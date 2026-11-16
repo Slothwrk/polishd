@@ -67,9 +67,6 @@
       "route": [
         "./dist/route.d.ts"
       ],
-      "telemetry": [
-        "./dist/telemetry.d.ts"
-      ],
       "proxy": [
         "./dist/proxy.d.ts"
       ],
