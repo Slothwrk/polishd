@@ -566,7 +566,7 @@ function VerdictButtons({
   onVerdict: (kind: Verdict) => void;
   onCreateFix: () => void;
   onCreatePr: () => void;
-  /** Where the buttons sit, for the dashboard's own telemetry: "row" or "drawer". */
+  /** Where the buttons sit: "row" or "drawer". */
   component: string;
   className?: string;
   trailing?: ReactNode;

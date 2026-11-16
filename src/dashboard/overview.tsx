@@ -253,7 +253,7 @@ export default function OverviewPanel({
       {!overview.ready && (
         <Callout tone="warn" className="mb-8">
           The analytics store isn&apos;t writable in this environment. Run locally or configure a
-          database — see the <Code>@polishd/next</Code> DATABASE.md guide.
+          database — see the <Code>@slothwrk/polishd</Code> DATABASE.md guide.
         </Callout>
       )}
 

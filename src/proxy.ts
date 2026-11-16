@@ -1,5 +1,5 @@
 /**
- * @polishd/next/proxy — anonymous session assignment from a proxy. Optional.
+ * @slothwrk/polishd/proxy — anonymous session assignment from a proxy. Optional.
  *
  * The ingest route mints the session cookie itself (see route.ts), so a new
  * install needs no proxy at all. These exports stay for hosts that already
@@ -7,7 +7,7 @@
  * than the first batch, which changes nothing about what gets stored.
  *
  *   // src/proxy.ts   (Next 16; `middleware.ts` on Next 15)
- *   export { proxy, config } from "@polishd/next/proxy";
+ *   export { proxy, config } from "@slothwrk/polishd/proxy";
  *
  * To compose with your own proxy logic, import `withPolishdSession` and
  * `polishdMatcher` instead and thread the same NextResponse through.

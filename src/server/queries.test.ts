@@ -266,27 +266,3 @@ test("errors aren't captured: ingest drops them, and stored ones never become jo
   assert.deepEqual(journey?.steps.map((s) => s.type), ["page_view", "click"]);
 });
 
-test("a source reads one dataset: the site's own events, or the telemetry it collects", async () => {
-  const site = await getOverview();
-  const siteBuild = (await getCurrentBuild())?.build;
-  await insertEvents(
-    "telemetry-1",
-    [
-      event({ type: "page_view", path: "/~polishd/analytics" }),
-      event({ type: "click", path: "/~polishd/analytics", selector: "a.tab", text: "Design" }),
-    ],
-    { installId: "example.com", build: "dashboard-build" },
-  );
-
-  assert.deepEqual(await getOverview(), site, "telemetry never counts as the site's traffic");
-  assert.deepEqual(await getOverview({ source: "site" }), site);
-  assert.equal((await getCurrentBuild())?.build, siteBuild);
-
-  const telemetry = await getOverview({ source: "telemetry" });
-  assert.equal(telemetry.totalEvents, 2);
-  assert.equal(telemetry.sessions, 1);
-  assert.equal(telemetry.pageViews, 1);
-  assert.equal((await getCurrentBuild("telemetry"))?.build, "dashboard-build");
-  assert.equal((await getCaptureHealth("telemetry")).recentEvents, 2);
-  assert.ok((await getCaptureHealth()).recentEvents > 2, "the site's health counts the site's events");
-});

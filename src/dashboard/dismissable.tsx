@@ -138,7 +138,7 @@ export function IgnoreButton({
  * A finding after it was ignored: struck through — which says "ignored" on
  * its own — with its reason in quiet text when one was given, and the two
  * follow-ups: give or edit the reason, or undo. `componentPrefix` names the
- * buttons for the dashboard's own telemetry (`actionable-ignore-reason`…).
+ * buttons (`actionable-ignore-reason`…).
  */
 export function DismissedCard({
   issue,

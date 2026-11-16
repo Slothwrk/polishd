@@ -33,13 +33,8 @@ import type { PolishdEvent, PolishdEventRow } from "../shared/types";
  */
 type Row = Record<string, unknown>;
 
-/**
- * What a whole batch shares and every row of it is tagged with: the reporting
- * installation (telemetry only) and the build the events were captured on.
- */
+/** What a whole batch shares and every row of it is tagged with. */
 export interface InsertTags {
-  /** Hostname of a remote install, on the telemetry path only. */
-  installId?: string;
   /** The build of the site, sanitized by ingest; absent when unknown. */
   build?: string | null;
 }
@@ -72,7 +67,7 @@ function eventValues(sessionId: string, e: PolishdEvent, now: number, tags: Inse
     e.value ?? null,
     e.meta ? JSON.stringify(e.meta) : null,
     now,
-    tags.installId ?? null,
+    null,
     tags.build ?? null,
   ];
 }
@@ -448,21 +443,19 @@ function databaseHost(url: string): string | null {
 /**
  * Persist a batch of events for one session. Silently drops if no store.
  *
- * `tags` is what the whole batch shares: the reporting install (only ever set
- * on the telemetry path — first-party ingest leaves it undefined and the
- * column null) and the build the events were captured on. A bare string is
- * still accepted as the install id, which is how this was called before
- * builds were tracked.
+ * `tags` is what the whole batch shares: the build the events were captured
+ * on. Rows written before install_id was removed still carry it; the column
+ * stays in the schema for them but nothing writes it anymore.
  */
 export async function insertEvents(
   sessionId: string,
   events: PolishdEvent[],
-  tags: string | InsertTags = {},
+  tags: InsertTags = {},
 ): Promise<number> {
   const b = await getBackend();
   if (!b || events.length === 0) return 0;
   try {
-    return await b.insert(sessionId, events, typeof tags === "string" ? { installId: tags } : tags);
+    return await b.insert(sessionId, events, tags);
   } catch (err) {
     console.warn(
       "[polishd] insert failed, dropping batch:",
@@ -562,7 +555,6 @@ function deserialize(row: Row): PolishdEventRow {
     value: row.value == null ? undefined : Number(row.value),
     meta: parseMeta(row.meta),
     received_at: Number(row.received_at),
-    install_id: (row.install_id as string) ?? undefined,
     build: (row.build as string) ?? undefined,
   };
 }

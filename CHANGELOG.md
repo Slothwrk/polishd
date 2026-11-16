@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.4.0
+
+**Private fork of `@polishd/next` — all cross-install telemetry and hosted
+services removed.** Published as `@slothwrk/polishd` on GitHub Packages.
+
+- **Telemetry removed, not just disabled.** The opt-in dashboard-usage
+  emitter, its consent prompt, the `@polishd/next/telemetry` collector route,
+  the Installs dashboard tab and its queries, `install_state` events, and the
+  `POLISHD_TELEMETRY`, `POLISHD_TELEMETRY_ENDPOINT` and
+  `POLISHD_ANALYTICS_SOURCE` variables are all gone. Nothing in this package
+  calls an address it doesn't own. (`install_id` remains in the schema so
+  databases migrated from upstream stay readable; it is always null here.)
+- **No default screenshot service.** `SNAPSHOT_SERVICE_URL` is deleted and
+  `POLISHD_SNAPSHOT_SERVICE` is now opt-in: unset means no service is ever
+  called. Local captures still work (`next dev` / private origins shoot with
+  a local browser), and `service/` — the shots app's full source — ships in
+  this repo for a self-hosted deployment; point the variable at its
+  `/api/v1` URL to use it.
+- **`site/` removed.** The marketing app is not part of this package.
+- The package, imports and CLI are renamed: `npm install @slothwrk/polishd`,
+  `npx @slothwrk/polishd init|doctor|db check`, and the same subpath exports
+  (`/client`, `/server`, `/route`, `/dashboard`, `/proxy`, `/dashboard.css`)
+  minus `/telemetry`.
+
 ## 0.3.2
 
 ### Connecting the database

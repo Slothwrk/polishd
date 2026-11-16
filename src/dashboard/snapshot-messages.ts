@@ -106,7 +106,7 @@ export function serviceFailureMessage(failure: ServiceFailure, ctx: FailureConte
     case "rejected":
       return `Polishd's screenshot service rejected the request${
         failure.message ? ` (${failure.message.replace(/\.$/, "")})` : ""
-      } — updating @polishd/next usually fixes this.`;
+      } — updating @slothwrk/polishd usually fixes this.`;
   }
 }
 

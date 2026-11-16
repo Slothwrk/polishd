@@ -433,12 +433,12 @@ export interface DesignScanOptions {
   /**
    * Replaces the default `location.pathname === path` staleness check — for
    * callers whose `path` is a namespaced label rather than a URL (the
-   * dashboard telemetry emitter labels its scans `/~polishd/<tab>`). Return
+   * dashboard scan emitter labels its scans `/~polishd/<tab>`). Return
    * false to drop a scan whose moment has passed.
    */
   stillCurrent?: () => boolean;
   /**
-   * Scan even though the page is the dashboard. Only the telemetry emitter
+   * Scan even though the page is the dashboard. Only an explicit caller
    * passes this: measuring the dashboard *is* its job, whereas for a host
    * site's capture the dashboard must never count as the site's design.
    */
@@ -502,7 +502,7 @@ export function scheduleDesignScan(
     // as the site's. The path check upstream normally catches this, but it
     // only knows the configured route — this recognizes the dashboard by its
     // own scope root, so a dashboard mounted anywhere is never scanned.
-    // (Unless the caller is the telemetry emitter, whose target it is.)
+    // (Unless the caller named the dashboard as its target.)
     if (!opts.scanDashboard && document.querySelector(".polishd-root")) return;
     try {
       const payload = collectDesignScan();

@@ -302,7 +302,7 @@ async function loadBlobSdk(): Promise<typeof import("@vercel/blob") | { message:
       message:
         "Blob storage is configured (BLOB_STORE_ID or BLOB_READ_WRITE_TOKEN is set) " +
         "but @vercel/blob isn't installed. It ships as an optional dependency of " +
-        "@polishd/next — reinstall without `--omit=optional`.",
+        "@slothwrk/polishd — reinstall without `--omit=optional`.",
     };
   }
 }
@@ -849,7 +849,7 @@ export async function captureLocalShot(
   try {
     shot = await shootLocally({
       origin: pending.origin,
-      // A dashboard-telemetry page is shot as the dashboard tab it stands for.
+      // A namespaced dashboard page is shot as the dashboard tab it stands for.
       route: capturePathFor(slot.route, resolveDashboardRoute()),
       device: slot.device,
       theme: slot.theme,
@@ -1022,7 +1022,7 @@ const CONSENT_KEY = "snapshot_service_consent";
 
 /**
  * The owner's answer to the consent dialog: whether production snapshots may
- * call Polishd's screenshot service. Kept per install, like telemetry consent.
+ * call the configured screenshot service. Kept per install.
  */
 export async function loadSnapshotConsent(): Promise<SnapshotConsent> {
   const raw = await getMeta(CONSENT_KEY);
@@ -1128,7 +1128,7 @@ export async function snapshotCaptureIssue(): Promise<string | null> {
       return (
         "Snapshot images would upload to Vercel Blob (BLOB_STORE_ID or " +
         "BLOB_READ_WRITE_TOKEN is set), but @vercel/blob isn't installed. It " +
-        "ships as an optional dependency of @polishd/next, so this install was " +
+        "ships as an optional dependency of @slothwrk/polishd, so this install was " +
         "likely run with `--omit=optional` — reinstall with optional " +
         "dependencies included, then redeploy."
       );

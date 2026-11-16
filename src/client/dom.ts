@@ -2,7 +2,7 @@
  * Polishd — DOM inspection helpers shared by every browser-side capture layer.
  *
  * Extracted from the main capture layer (`init.ts`) so the dashboard's own
- * telemetry emitter describes a click the same way the host site's capture
+ * dashboard emitter describes a click the same way the host site's capture
  * does — same selector shape, same component walk, same interactivity rules —
  * and the two can never drift apart.
  */

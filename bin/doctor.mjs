@@ -1,5 +1,5 @@
 /**
- * `npx @polishd/next doctor` — check that an install is actually wired up.
+ * `npx @slothwrk/polishd doctor` — check that an install is actually wired up.
  *
  * Every failure this looks for is one that produces no error at runtime. A
  * proxy named for the wrong Next major, a matcher that doesn't cover the pages
@@ -251,7 +251,7 @@ export async function runDoctor(argv, cwd) {
         WARN,
         `${pagePath} doesn't export the dashboard's metadata`,
         "So /polishd takes your app's metadata, and search engines may index it. Add " +
-          '`export { metadata } from "@polishd/next/dashboard";`.',
+          '`export { metadata } from "@slothwrk/polishd/dashboard";`.',
       );
     }
   }
@@ -263,7 +263,7 @@ export async function runDoctor(argv, cwd) {
   const pageReadsDefaults = Boolean(pageCode && pageCode.includes(DEFAULTS_FILE));
   if (defaultsSrc === null) {
     if (pageReadsDefaults) {
-      add(FAIL, `${pagePath} imports ${DEFAULTS_FILE}, which doesn't exist`, "The build fails until it does. `npx @polishd/next init` writes one.");
+      add(FAIL, `${pagePath} imports ${DEFAULTS_FILE}, which doesn't exist`, "The build fails until it does. `npx @slothwrk/polishd init` writes one.");
     }
   } else {
     let parsed;
@@ -295,7 +295,7 @@ export async function runDoctor(argv, cwd) {
           `${pagePath} doesn't import ${DEFAULTS_FILE}`,
           "So the dashboard reads none of it. Add " +
             `\`import defaults from "…/${DEFAULTS_FILE}";\` and pass \`createPolishdPage({ defaults })\`` +
-            " — or run `npx @polishd/next init --force` if init wrote the page.",
+            " — or run `npx @slothwrk/polishd init --force` if init wrote the page.",
         );
       } else if (!notObject && secrets.length === 0) {
         add(PASS, `${DEFAULTS_FILE} is read by the dashboard`, "saved settings override it");
@@ -434,7 +434,7 @@ async function liveChecks(origin, add, cwd) {
         FAIL,
         "Ingest is dropping events: no_session",
         "The request carried no session cookie and the route didn't mint one, so every new " +
-          "visitor's batches are dropped. Routes from an older @polishd/next need a proxy to mint " +
+          "visitor's batches are dropped. Routes from an older @slothwrk/polishd need a proxy to mint " +
           "it: upgrade the package on the site. Otherwise something in front of the app is " +
           "stripping both the Origin and Sec-Fetch-Site headers, which the route reads to tell a " +
           "page's batch from a bare script, or a route of your own around `ingest()` passes no " +
@@ -453,7 +453,7 @@ async function liveChecks(origin, add, cwd) {
       add(
         WARN,
         "Could not verify the write path",
-        "The site's @polishd/next predates the doctor's write probe. The cookie check above " +
+        "The site's @slothwrk/polishd predates the doctor's write probe. The cookie check above " +
           "still holds; upgrade the package on the site to check storage too.",
       );
     } else {

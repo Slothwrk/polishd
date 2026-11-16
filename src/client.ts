@@ -1,5 +1,5 @@
 /**
- * @polishd/next/client — browser capture surface.
+ * @slothwrk/polishd/client — browser capture surface.
  *
  * `initPolishd` is framework-free vanilla DOM (call it from
  * `instrumentation-client.ts`). `PolishdMonitor` is a React component for

@@ -19,7 +19,6 @@ register(
 const { analyticsHref, parseAnalyticsRange, rangeBuild, rangeLabel, rangePill, rangeSince } = await import(
   "./analytics-range.ts"
 );
-const { parseAnalyticsSource } = await import("./analytics-source.ts");
 
 const DAY = 86_400_000;
 
@@ -62,22 +61,10 @@ test("rangeLabel reads as the end of a sentence", () => {
   assert.equal(rangeLabel("build:v1.2"), "build v1.2");
 });
 
-test("parseAnalyticsSource only admits the two datasets", () => {
-  assert.equal(parseAnalyticsSource("site"), "site");
-  assert.equal(parseAnalyticsSource("telemetry"), "telemetry");
-  assert.equal(parseAnalyticsSource(undefined), null);
-  assert.equal(parseAnalyticsSource("Telemetry"), null);
-  assert.equal(parseAnalyticsSource("site' OR 1=1"), null);
-});
-
-test("analyticsHref carries the source only when the view names one", () => {
+test("analyticsHref links the tab to the range", () => {
   assert.equal(analyticsHref("7d"), "?tab=analytics&range=7d");
-  assert.equal(analyticsHref("7d", null), "?tab=analytics&range=7d");
-  assert.equal(analyticsHref("all", "site"), "?tab=analytics&range=all&source=site");
-  assert.equal(
-    analyticsHref("build:v1.2", "telemetry"),
-    "?tab=analytics&range=build%3Av1.2&source=telemetry",
-  );
+  assert.equal(analyticsHref("all"), "?tab=analytics&range=all");
+  assert.equal(analyticsHref("build:v1.2"), "?tab=analytics&range=build%3Av1.2");
 });
 
 test("rangePill lights “This build” for the current build named by label", () => {

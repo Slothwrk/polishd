@@ -1,4 +1,4 @@
-# AGENTS.md — installing `@polishd/next` into an app
+# AGENTS.md — installing `@slothwrk/polishd` into an app
 
 Instructions for a coding agent asked to add Polishd to a Next.js application.
 Human-oriented prose lives in [README.md](./README.md) and
@@ -29,23 +29,23 @@ Record two facts you will need throughout:
 ## Phase 2 — Install
 
 ```bash
-npm install @polishd/next
+npm install @slothwrk/polishd
 ```
 
 `pg` arrives automatically as an optional dependency; it is only loaded when a
 Postgres URL is configured. No separate install is needed.
 
-Check the installed version (`node_modules/@polishd/next/package.json`). This
+Check the installed version (`node_modules/@slothwrk/polishd/package.json`). This
 procedure is for **0.3.2 and later**, which need no proxy. Up to 0.3.2-dev.0 a
 proxy was required: if that is what got installed, follow
-`node_modules/@polishd/next/AGENTS.md` instead.
+`node_modules/@slothwrk/polishd/AGENTS.md` instead.
 
 ## Phase 3 — Scaffold
 
 Prefer the CLI. It detects `BASE` and `CC` itself:
 
 ```bash
-npx @polishd/next init
+npx @slothwrk/polishd init
 ```
 
 Flags: `--dry-run` (preview), `--force` (regenerate files the CLI itself wrote,
@@ -70,7 +70,7 @@ Contents are load-bearing; see Phase 5.
 **1. `{BASE}/instrumentation-client.ts`** — starts browser capture.
 
 ```ts
-import { initPolishd } from "@polishd/next/client";
+import { initPolishd } from "@slothwrk/polishd/client";
 
 initPolishd();
 ```
@@ -79,7 +79,7 @@ initPolishd();
 the anonymous session cookie, on a visitor's first batch.
 
 ```ts
-import { createPolishdRoute } from "@polishd/next/route";
+import { createPolishdRoute } from "@slothwrk/polishd/route";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -90,11 +90,11 @@ export const POST = createPolishdRoute();
 **3. `{BASE}/app/polishd/page.tsx`** — the dashboard.
 
 ```tsx
-import "@polishd/next/dashboard.css";
-import { createPolishdPage } from "@polishd/next/dashboard";
+import "@slothwrk/polishd/dashboard.css";
+import { createPolishdPage } from "@slothwrk/polishd/dashboard";
 import defaults from "../../polishd.defaults.json"; // "../../../" when BASE is src
 
-export { metadata } from "@polishd/next/dashboard"; // keeps /polishd unindexed
+export { metadata } from "@slothwrk/polishd/dashboard"; // keeps /polishd unindexed
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -135,7 +135,7 @@ Polishd palette whatever the host's Tailwind preset says. The CLI still writes
 this line into the page, which is harmless and makes the dependency visible:
 
 ```tsx
-import "@polishd/next/dashboard.css";
+import "@slothwrk/polishd/dashboard.css";
 ```
 
 The stylesheet is compiled at publish time and self-contained. **Do not add
@@ -148,7 +148,7 @@ it cannot restyle the host app. It loads the dashboard's brand fonts from
 from the app's own origin, so there is nothing to configure and no CSP
 `font-src` change.
 
-**On an existing 0.1.x install**, remove the `@source ".../@polishd/next/dist"`
+**On an existing 0.1.x install**, remove the `@source ".../@slothwrk/polishd/dist"`
 line (or the `content` glob in `tailwind.config.*`). It compiles the dashboard's
 class names against the *host's* palette, which has no `line`, `surface` or
 `fg-3`: on packages before 0.2.3-dev.23 that is what turns borders white and
@@ -161,7 +161,7 @@ Violating any of these produces a broken build or a security hole. They are not
 style preferences.
 
 1. **`runtime` and `dynamic` must be declared inline** in both the route and the
-   page module. `export { POST, runtime, dynamic } from "@polishd/next/route"`
+   page module. `export { POST, runtime, dynamic } from "@slothwrk/polishd/route"`
    fails the build with *"Next.js can't recognize the exported `runtime` field
    in route. It mustn't be reexported."* **Exception: when `CC` is true,
    declare neither** — Next fails the build on both, in either form.
@@ -174,8 +174,8 @@ style preferences.
    renders a locked screen and every server action denies. Development is
    unaffected. See Phase 6.
 
-3. **Never import `@polishd/next/server` from a client component.** It pulls
-   database drivers into the browser bundle. Use `@polishd/next/client` there.
+3. **Never import `@slothwrk/polishd/server` from a client component.** It pulls
+   database drivers into the browser bundle. Use `@slothwrk/polishd/client` there.
 
 4. **`runtime` must be `"nodejs"`.** The store uses `node:sqlite`/`pg`; neither
    runs on the Edge runtime. When `CC` is true, leave `runtime` out: Cache
@@ -205,7 +205,7 @@ raw token, server-side expiry, and per-IP rate limiting are all handled.
 Pass options only if the dashboard is not at `/polishd`:
 
 ```tsx
-import { createPolishdPage, polishdTokenAuth } from "@polishd/next/dashboard";
+import { createPolishdPage, polishdTokenAuth } from "@slothwrk/polishd/dashboard";
 export default createPolishdPage({
   authenticate: polishdTokenAuth({ basePath: "/admin/polishd" }),
 });
@@ -215,7 +215,7 @@ export default createPolishdPage({
 user which one rather than guessing.
 
 ```tsx
-import { createPolishdPage } from "@polishd/next/dashboard";
+import { createPolishdPage } from "@slothwrk/polishd/dashboard";
 import { isAuthenticated } from "@/lib/auth";
 import { MyLogin } from "./login";
 
@@ -279,7 +279,7 @@ store doesn't run yet; say so if that's the host.
 
    ```bash
    npx vercel env pull .polishd/env.check --environment production --yes
-   npx @polishd/next db check --env-file .polishd/env.check --var DATABASE_URL
+   npx @slothwrk/polishd db check --env-file .polishd/env.check --var DATABASE_URL
    ```
 
    `.polishd/` is gitignored, and `db check` never prints the URL. Don't print
@@ -329,7 +329,7 @@ store doesn't run yet; say so if that's the host.
 4. **Confirm.** `npx vercel env ls --environment production` now lists
    `POLISHD_DATABASE_URL`. It applies from the next production deployment:
    ask before deploying. Once it's live,
-   `npx @polishd/next doctor --url https://<production domain>` should say
+   `npx @slothwrk/polishd doctor --url https://<production domain>` should say
    *"Ingest reached the store"*.
 
 ## Phase 6b — Describe the site in `polishd.defaults.json`
@@ -426,7 +426,7 @@ a pull request. If the repo already has a workflow using
 `anthropics/claude-code-action`, don't add another: the dashboard's Fix card
 will read the one there. Otherwise, on a yes:
 
-1. `npx @polishd/next init --fix-workflow` writes
+1. `npx @slothwrk/polishd init --fix-workflow` writes
    `.github/workflows/claude.yml`. It goes in the setup PR. Use
    `--fix-workflow=api-key` if the user would rather runs bill an API key than
    their Claude plan.
@@ -447,7 +447,7 @@ alone — most of what can be wrong here builds cleanly and fails silently.
 Start with the doctor, which checks the whole wiring in one command:
 
 ```bash
-npx @polishd/next doctor
+npx @slothwrk/polishd doctor
 ```
 
 It verifies that capture and ingest exist, that `runtime` and `dynamic` are
@@ -465,7 +465,7 @@ cookie is really minted and the store is really writable. The write check is a
 probe that records no event, so it is safe to point at production:
 
 ```bash
-npx @polishd/next doctor --url http://localhost:3000
+npx @slothwrk/polishd doctor --url http://localhost:3000
 ```
 
 Then confirm by hand:
@@ -497,7 +497,7 @@ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:3000/polishd
 #    decided (Phase 6); the server log says "[polishd] dashboard is locked"
 
 # 5. Styling is present — the stylesheet must contain dashboard utilities.
-#    The dashboard imports "@polishd/next/dashboard.css" itself; check that a
+#    The dashboard imports "@slothwrk/polishd/dashboard.css" itself; check that a
 #    card border computes to rgb(38, 38, 38), not the host's border colour
 #    (dark theme, the default; the light theme's is rgb(231, 231, 231)).
 ```
@@ -554,7 +554,7 @@ turned off, with the reason. That's expected, not a broken install. Two things c
 need a change:
 
 - **A strict Content-Security-Policy.** If the app sets `connect-src`, add
-  `https://shots.polishd.muskanvaswan.xyz` (the service) and
+  your shots service's origin (a self-hosted `service/` deployment) and
   `https://vercel.com` (Blob uploads). Without them the dashboard reports a
   CSP block.
 - **Protected previews.** Vercel Deployment Protection shows the service a
@@ -574,17 +574,17 @@ until `POLISHD_DATABASE_URL` is set.
 
 ## Troubleshooting
 
-Run `npx @polishd/next doctor` first — it names most of these directly.
+Run `npx @slothwrk/polishd doctor` first — it names most of these directly.
 
 | Symptom | Cause | Fix |
 |---|---|---|
 | *"can't recognize the exported `runtime` field"* | Route segment config re-exported | Declare `runtime`/`dynamic` inline (Phase 3b) |
 | *"Route segment config "dynamic" is not compatible with `nextConfig.cacheComponents`"* (or `"runtime"`) | The app sets `cacheComponents: true` | Remove both exports from the route and the page (Phase 3b) |
 | *"Route "/polishd": … uncached or runtime data during prerendering"* | `cacheComponents` is on and the dashboard renders outside `<Suspense>` | `export default createPolishdPage({ suspense: true });` |
-| *"Cannot find module '@polishd/next/route' or its corresponding type declarations"* at build | tsconfig has `"moduleResolution": "node"` and the package predates its `typesVersions` fallback | Upgrade the package. Don't change the host's tsconfig to work around it |
+| *"Cannot find module '@slothwrk/polishd/route' or its corresponding type declarations"* at build | tsconfig has `"moduleResolution": "node"` and the package predates its `typesVersions` fallback | Upgrade the package. Don't change the host's tsconfig to work around it |
 | Ingest answers 413 `too_large` | Request body over 1MB. A real batch is well under 64KB | Nothing to fix for real traffic; a client sending that much isn't the capture script |
 | Every `/api/*` route 404s | A proxy of the app's whose matcher matches `/api` | Exclude `/api` from that matcher |
-| Dashboard has harsh white borders and no greys | Package older than 0.2.3-dev.23 with no `dashboard.css` import, so the host's Tailwind styles it with the host's palette | Upgrade; remove the `@polishd/next/dist` scan line (Phase 4) |
+| Dashboard has harsh white borders and no greys | Package older than 0.2.3-dev.23 with no `dashboard.css` import, so the host's Tailwind styles it with the host's palette | Upgrade; remove the `@slothwrk/polishd/dist` scan line (Phase 4) |
 | `/polishd` shows "This database is already in use" | Something other than Polishd already has a `polishd_events` or `polishd_meta` table in that database. Polishd refused it and changed nothing | Give Polishd a database of its own (Phase 6a, step 3), then redeploy |
 | `/polishd` shows "Connect a database", "Can't reach the database", "Install the Postgres driver" or "Upgrade Node" | No store could be opened; the screen says which and why | Follow its steps: set `POLISHD_DATABASE_URL` (pooled), fix the URL, `npm install pg`, or Node ≥ 22.5. Redeploy after changing the environment |
 | Dashboard shows *"they arrive without a session, so none are stored"* | No batch can be minted a session: something in front of the app (CDN, firewall, proxy) strips both `Origin` and `Sec-Fetch-Site`, or a route of the app's own around `ingest()` passes no session id. Red means *nothing is being stored* — with events landing you get a neutral note instead | `doctor --url <origin>`; plain `doctor` only reads the source tree, so it can pass while a deployed site still drops every batch |
@@ -594,11 +594,11 @@ Run `npx @polishd/next doctor` first — it names most of these directly.
 | No `polishd_session` cookie on a page request | Expected: the ingest route sets it on the response to the first batch | Nothing to fix. Check step 3 of Phase 7 instead; never add a proxy for it |
 | Dashboard content unreachable below the fold | Host `body` doesn't scroll | Fixed by default; if an ancestor sets `transform`/`filter`/`contain`, pass `shell: false` and use a route-group layout (docs/SETUP.md) |
 | `doctor`: *"polishd.defaults.json holds a secret"* | A key or token was written into the committed file | Remove it and **rotate it** — it's in git history. Set it in the host's environment instead, or name the app's own variable in `ai.apiKeyEnv` |
-| `doctor`: *"page doesn't import polishd.defaults.json"* | A page from before the file existed | `npx @polishd/next init --force` if init wrote the page; otherwise add the import and `createPolishdPage({ defaults })` |
+| `doctor`: *"page doesn't import polishd.defaults.json"* | A page from before the file existed | `npx @slothwrk/polishd init --force` if init wrote the page; otherwise add the import and `createPolishdPage({ defaults })` |
 | Edits to `polishd.defaults.json` don't show in the dashboard | A value saved in the dashboard (or set in `POLISHD_AI_*`) is overriding that field | Expected: the file holds defaults. Change it in the dashboard, or unset the variable |
 | Server actions 500 with an opaque digest | No dashboard page registered a policy | Expected if `app/polishd/page.tsx` was deleted — actions fail closed |
-| Database drivers in the client bundle | `@polishd/next/server` imported client-side | Import from `@polishd/next/client` |
-| Snapshot capture reports a CSP block | The app's `connect-src` omits the screenshot service or the Blob API | Add `https://shots.polishd.muskanvaswan.xyz` and `https://vercel.com` to `connect-src` |
+| Database drivers in the client bundle | `@slothwrk/polishd/server` imported client-side | Import from `@slothwrk/polishd/client` |
+| Snapshot capture reports a CSP block | The app's `connect-src` omits the screenshot service or the Blob API | Add your shots service's origin and `https://vercel.com` to `connect-src` |
 | Snapshot capture: "behind Vercel's Deployment Protection" | A protected preview deployment | Expected — capture from the production domain |
 | Snapshot capture: "nowhere to live on this deployment" | Vercel, no Blob store connected | Connect a Blob store (Storage → Blob), redeploy |
 | Site snapshots at the bottom of the Design tab, marked Off | No Blob store, the owner declined the screenshot service, or the last capture found it unusable here (CSP, rate limit, outage, site not public). That last kind is remembered until "Try again" succeeds | Its message names which. Declining is the owner's choice — leave it |
@@ -607,17 +607,17 @@ Run `npx @polishd/next doctor` first — it names most of these directly.
 
 | Import | Contents | Environment |
 |---|---|---|
-| `@polishd/next` | config, `definePolishdConfig`, event types | isomorphic |
-| `@polishd/next/client` | `initPolishd`, `PolishdMonitor` | browser |
-| `@polishd/next/server` | store, ingest, queries, `withPolishdSession` | Node only |
-| `@polishd/next/route` | `POST`, `createPolishdRoute` | Node only |
-| `@polishd/next/proxy` | `proxy`, `config`, `withPolishdSession`, `polishdMatcher`, `composePolishd` — optional, for installs that mint the cookie from a proxy | Edge-safe |
-| `@polishd/next/dashboard` | `createPolishdPage`, `polishdTokenAuth`, `PolishdDashboard` | Node only |
+| `@slothwrk/polishd` | config, `definePolishdConfig`, event types | isomorphic |
+| `@slothwrk/polishd/client` | `initPolishd`, `PolishdMonitor` | browser |
+| `@slothwrk/polishd/server` | store, ingest, queries, `withPolishdSession` | Node only |
+| `@slothwrk/polishd/route` | `POST`, `createPolishdRoute` | Node only |
+| `@slothwrk/polishd/proxy` | `proxy`, `config`, `withPolishdSession`, `polishdMatcher`, `composePolishd` — optional, for installs that mint the cookie from a proxy | Edge-safe |
+| `@slothwrk/polishd/dashboard` | `createPolishdPage`, `polishdTokenAuth`, `PolishdDashboard` | Node only |
 
 ## CLI
 
 | Command | Purpose |
 |---|---|
-| `npx @polishd/next init` | Scaffold. `--dry-run`, `--force`, `--js`, `--config`, `--fix-workflow[=api-key]` |
-| `npx @polishd/next doctor` | Check the install. `--url <origin>` adds live checks |
-| `npx @polishd/next db check` | Can Polishd use this database? `--env-file <path>`, `--var <NAME>`. Never prints the URL |
+| `npx @slothwrk/polishd init` | Scaffold. `--dry-run`, `--force`, `--js`, `--config`, `--fix-workflow[=api-key]` |
+| `npx @slothwrk/polishd doctor` | Check the install. `--url <origin>` adds live checks |
+| `npx @slothwrk/polishd db check` | Can Polishd use this database? `--env-file <path>`, `--var <NAME>`. Never prints the URL |

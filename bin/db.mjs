@@ -1,5 +1,5 @@
 /**
- * `npx @polishd/next db check` — can Polishd use this database?
+ * `npx @slothwrk/polishd db check` — can Polishd use this database?
  *
  * For whoever wires up production, usually an agent choosing between the
  * app's own database and a new one. It connects with a URL held in an
@@ -80,7 +80,7 @@ export async function runDb(argv, cwd) {
   // ── Connect, with the driver the app itself would use ──────────────────────
   const pg = loadPg(cwd);
   if (!pg) {
-    add("fail", "The pg driver isn't installed", "It's an optional dependency of @polishd/next. Run `npm install pg`.");
+    add("fail", "The pg driver isn't installed", "It's an optional dependency of @slothwrk/polishd. Run `npm install pg`.");
     return report(results, name, envFile);
   }
   const client = new pg.Client({

@@ -3,7 +3,7 @@
  *
  * Vanilla DOM, no framework imports, so it drops cleanly into Next's
  * `instrumentation-client.ts` (runs before hydration) and is trivially
- * extractable into `@polishd/next`. It attaches global listeners, derives
+ * extractable into `@slothwrk/polishd`. It attaches global listeners, derives
  * behavioral signals (rage/dead clicks, scroll depth, web vitals), batches
  * events, and flushes on an interval, on soft navigation, and on pagehide.
  */
@@ -86,7 +86,7 @@ export function initPolishd(options: InitOptions = {}): void {
             "no session.\n" +
             "  The route from `createPolishdRoute()` mints one itself; a handler of your own " +
             "around `ingest()` has to pass a session id.\n" +
-            "  Run `npx @polishd/next doctor` to check.",
+            "  Run `npx @slothwrk/polishd doctor` to check.",
         );
       })
       .catch(() => {
@@ -121,7 +121,7 @@ export function initPolishd(options: InitOptions = {}): void {
 
   // ---- click + rage + dead -------------------------------------------------
 
-  // Shared with the dashboard's telemetry emitter (see click-capture.ts). A
+  // Shared with dashboard emitters (see click-capture.ts). A
   // click on something that isn't a control is held for a second and judged
   // by whether the page responded, so its event can arrive after later ones;
   // it carries its own click-time `ts` and `path`.

@@ -203,7 +203,7 @@ export function nodeVersionOk() {
 }
 
 /** The dist path Tailwind must be told to scan (v4 `@source`, v3 `content`). */
-export const DIST_GLOB = "node_modules/@polishd/next/dist";
+export const DIST_GLOB = "node_modules/@slothwrk/polishd/dist";
 
 // ── Defaults file, GitHub token, Fix workflow ─────────────────────────────────
 

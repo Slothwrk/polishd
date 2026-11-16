@@ -6,7 +6,7 @@
  * calls this; the test file feeds it payloads directly.
  *
  * Installs on older package versions keep reporting to the same store (and
- * the telemetry collector ingests every version at once), so every field
+ * the collector ingests every version at once), so every field
  * past the original shape is optional here: a scan without declaration
  * counts leaves those values' declarations unknown, and they keep the per-use
  * one-off reading; one without class-name readings is not a Tailwind site and

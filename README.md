@@ -1,4 +1,4 @@
-# @polishd/next
+# @slothwrk/polishd
 
 > **What gets measured gets improved.**
 
@@ -24,24 +24,24 @@ Cursor, Copilot, or any other coding agent, **paste this prompt** and let it do
 the whole install:
 
 ```text
-Install @polishd/next into this Next.js app.
+Install @slothwrk/polishd into this Next.js app.
 
 It's a new package, so you may not recognise it and a web search may not find
 it yet. It is on npm (not a typo of `polished`): confirm with
-`npm view @polishd/next`, then install it.
+`npm view @slothwrk/polishd`, then install it.
 
 Follow its install procedure exactly: https://polishd.site/AGENTS.md
-Once it's installed, read node_modules/@polishd/next/AGENTS.md instead; it
+Once it's installed, read node_modules/@slothwrk/polishd/AGENTS.md instead; it
 matches the installed version.
 
 Work through its phases in order and do not skip Phase 7 (verification).
 Several of its constraints fail silently at runtime rather than at build time,
 so a passing build does not mean the install worked.
 
-Finish by running `npx @polishd/next doctor` and fixing everything it reports.
+Finish by running `npx @slothwrk/polishd doctor` and fixing everything it reports.
 ```
 
-`npx @polishd/next doctor` is the ground truth: it checks the wiring that fails
+`npx @slothwrk/polishd doctor` is the ground truth: it checks the wiring that fails
 quietly — route segment config re-exported instead of declared, capture or
 ingest missing, the dashboard left unprotected. Add
 `--url http://localhost:3000` to also verify live that the session cookie is
@@ -66,14 +66,14 @@ minted and events actually store.
 ## Quickstart
 
 ```bash
-npm install @polishd/next
-npx @polishd/next init
+npm install @slothwrk/polishd
+npx @slothwrk/polishd init
 npm run dev                  # then visit /polishd
-npx @polishd/next doctor     # confirm the wiring
+npx @slothwrk/polishd doctor     # confirm the wiring
 ```
 
 (`npx polishd init` is the shorter form once the package is installed;
-`npx @polishd/next init` also works before it is.)
+`npx @slothwrk/polishd init` also works before it is.)
 
 That's it locally — events write to `.polishd/analytics.db` with no
 configuration. `init` detects your layout (`src/` or root), writes the three
@@ -98,20 +98,20 @@ you point Polishd at a Postgres URL.
 
 ```ts
 // src/instrumentation-client.ts — starts capture before hydration
-import { initPolishd } from "@polishd/next/client";
+import { initPolishd } from "@slothwrk/polishd/client";
 initPolishd();
 
 // src/app/api/polishd/route.ts — the ingest endpoint; mints the session cookie
-import { createPolishdRoute } from "@polishd/next/route";
+import { createPolishdRoute } from "@slothwrk/polishd/route";
 export const runtime = "nodejs";        // must be declared here, not re-exported
 export const dynamic = "force-dynamic";
 export const POST = createPolishdRoute();
 
 // src/app/polishd/page.tsx — the dashboard
-import "@polishd/next/dashboard.css";   // self-contained; no Tailwind needed
-import { createPolishdPage } from "@polishd/next/dashboard";
+import "@slothwrk/polishd/dashboard.css";   // self-contained; no Tailwind needed
+import { createPolishdPage } from "@slothwrk/polishd/dashboard";
 import defaults from "../../../polishd.defaults.json"; // your site's defaults
-export { metadata } from "@polishd/next/dashboard"; // robots: noindex
+export { metadata } from "@slothwrk/polishd/dashboard"; // robots: noindex
 export const runtime = "nodejs";       // Next requires these inline in the page
 export const dynamic = "force-dynamic";
 export default createPolishdPage({ defaults }); // see Protecting the dashboard
@@ -119,7 +119,7 @@ export default createPolishdPage({ defaults }); // see Protecting the dashboard
 
 > **Route segment config can't be re-exported.** Next statically parses
 > `runtime` and `dynamic`, so `export { POST, runtime, dynamic } from
-> "@polishd/next/route"` fails the build — declare them inline as above. The same
+> "@slothwrk/polishd/route"` fails the build — declare them inline as above. The same
 > applies to the dashboard page.
 
 > **With `cacheComponents: true`, leave them out.** Next rejects `runtime` and
@@ -159,7 +159,7 @@ dependency visible:
 
 ```tsx
 // app/polishd/page.tsx
-import "@polishd/next/dashboard.css";
+import "@slothwrk/polishd/dashboard.css";
 ```
 
 **Tailwind is not required in your app.** The stylesheet is compiled at publish
@@ -186,7 +186,7 @@ property. Nothing short of `!important` on our side would, and a package
 shouting over its host is worse than a rare collision.
 
 > **Upgrading from 0.1.x?** Nothing to do — your existing `@source
-> "…/@polishd/next/dist"` keeps compiling the dashboard's utilities exactly as
+> "…/@slothwrk/polishd/dist"` keeps compiling the dashboard's utilities exactly as
 > before, so the dashboard stays styled whether or not you add the import.
 >
 > To move over at your own pace, **add the import first, then** delete the
@@ -221,7 +221,7 @@ unlock form is rate-limited per IP.
 Tune it if you moved the dashboard off `/polishd`:
 
 ```tsx
-import { createPolishdPage, polishdTokenAuth } from "@polishd/next/dashboard";
+import { createPolishdPage, polishdTokenAuth } from "@slothwrk/polishd/dashboard";
 
 export default createPolishdPage({
   authenticate: polishdTokenAuth({ basePath: "/admin/polishd" }),
@@ -231,7 +231,7 @@ export default createPolishdPage({
 ### 2. Your app's own auth
 
 ```tsx
-import { createPolishdPage } from "@polishd/next/dashboard";
+import { createPolishdPage } from "@slothwrk/polishd/dashboard";
 import { isAuthenticated } from "@/lib/auth";
 import { MyLogin } from "./login";
 
@@ -420,7 +420,7 @@ authoritative context, so:
 - On serverless hosts, where the source isn't on disk, the scan reads the
   connected GitHub repo instead: one tree listing, then only the files the
   budget picks. In a monorepo it finds the app's folder itself — the one whose
-  `package.json` installs `@polishd/next` — and **Source folders** are relative
+  `package.json` installs `@slothwrk/polishd` — and **Source folders** are relative
   to that folder.
 
 > **What the model sees.** A compact, server-side digest of the aggregated
@@ -746,10 +746,14 @@ flagged value on the Design tab to see that picture and the page it's on.
    chromium` once if you have neither). Nothing leaves the machine and
    there's nothing to agree to.
 2. **Production**: your server doesn't run a browser. The dashboard, in your
-   browser, sends each page to **Polishd's screenshot service**
-   (`shots.polishd.muskanvaswan.xyz`, source in [`service/`](./service)) one
-   at a time. The service loads that page on the site the dashboard is
-   running on and sends back WebP images, which appear in the gallery as they
+   browser, sends each page to **your own screenshot service** — a
+   self-hosted deployment of [`service/`](./service), a small Next.js app
+   built to run free on a Vercel hobby account — one
+   at a time, when `POLISHD_SNAPSHOT_SERVICE` names its URL. Without that
+   variable set there is no service and the section is off; nothing is ever
+   sent anywhere by default. The service loads that page on the site the
+   dashboard is running on and sends back WebP images, which appear in the
+   gallery as they
    arrive and are then stored by your install. The first time you press
    **Capture**, a dialog **asks you once** whether snapshots may use the
    service, and says what it does and doesn't see. Allowing it starts the
@@ -771,7 +775,7 @@ flagged value on the Design tab to see that picture and the page it's on.
 
 What the service does, plainly:
 
-- **Page URLs and pixels pass through Polishd's service.** It sees the paths
+- **Page URLs and pixels pass through your service.** It sees the paths
   being shot and renders them like any visitor would. It returns the images
   and doesn't store or log them. Its rate limiter keeps the site's hostname
   (and a hash of your IP) for an hour at most.
@@ -784,19 +788,9 @@ What the service does, plainly:
   the section says which one and when to try again, and keeps the pages it
   had already shot.
 - You can withdraw the agreement any time from the section ("Turn off").
-  `POLISHD_SNAPSHOT_SERVICE=off` stops the service from ever being called;
-  snapshots are then only taken in local development.
-
-**Polishd's own dashboard pages.** An install that reads dashboard telemetry
-(`POLISHD_ANALYTICS_SOURCE=telemetry`, which is Polishd's own site) measures
-the dashboard's tabs, labelled `/~polishd/<tab>`. Production captures never
-shoot those, because the service would need your dashboard's credentials. A
-capture in local development does: your own Chrome opens each tab of the
-development dashboard (where it's open without a login). Run the site locally
-with the production environment (`vercel env pull`) and the pictures upload
-to the production Blob store, so the live Design tab shows them. Telemetry the
-captured dashboard would send is answered locally, so it never counts as
-usage.
+  Unsetting `POLISHD_SNAPSHOT_SERVICE` (or setting it to `off`/`local`) means
+  no service is ever called; snapshots are then only taken in local
+  development.
 
 **Where the images go.** On disk under `.polishd/snapshots/` locally, and on
 a self-hosted server with a writable disk (`POLISHD_SNAPSHOT_DIR` overrides).
@@ -817,7 +811,7 @@ sends a strict Content-Security-Policy**, allow the service and the Blob API
 in `connect-src`:
 
 ```
-connect-src 'self' https://shots.polishd.muskanvaswan.xyz https://vercel.com;
+connect-src 'self' https://<your-shots-deployment>.vercel.app https://vercel.com;
 ```
 
 The section recognises a CSP block and names the directive to change. It
@@ -887,7 +881,7 @@ attribution; pass `content` for articles/regions to also measure viewport time,
 scroll depth, and rendered size.
 
 ```tsx
-import { PolishdMonitor } from "@polishd/next/client";
+import { PolishdMonitor } from "@slothwrk/polishd/client";
 
 <PolishdMonitor name="listen-button">
   <ListenButton />
@@ -897,49 +891,6 @@ import { PolishdMonitor } from "@polishd/next/client";
   <Article />
 </PolishdMonitor>
 ```
-
-## Dashboard telemetry
-
-Polishd can report anonymous usage of its own dashboard back to the polishd
-project — the same rage-click/dead-click/page-view signals it captures for
-you, applied to itself, so the dashboard is improved by what it preaches.
-
-**Opt-in, and off by default.** The first time you open the dashboard it asks
-once; nothing is sent unless you say yes. What's shared when you do:
-
-- Clicks and tab views **inside the dashboard only** (paths are namespaced
-  `/~polishd/…` and capture suspends the moment you navigate back to your
-  site), plus one viewport-size sample per session.
-- Your site's **domain** — the collecting side reads it from the request's
-  Origin header, so installations are named by where the dashboard actually
-  runs — and an anonymous per-browser-session id. No cookies, no
-  fingerprinting, no URLs, page content, or user data from your site — your
-  analytics never leave your database.
-- Once per session, whether a **model is connected** and which provider/model
-  it is — never the key, never any setting beyond those two names — and the
-  **polishd version** you run. This is how the project learns which AI setups
-  to test against, and which release the friction it sees came from.
-
-Say no and it never asks again. Change your mind, or disable it fleet-wide,
-with `POLISHD_TELEMETRY=off`; `navigator.doNotTrack` is honored regardless of
-consent. The receiving end is an ordinary `@polishd/next/telemetry` route on
-the polishd site's own installation — the same package, dogfooding itself.
-
-On the *collecting* side, telemetry stays fully separated from the host's own
-analytics: tagged rows are excluded from every first-party query (stats,
-pages, features, journeys, the AI digest) and appear only in an **Installs**
-dashboard tab — per-domain sessions, tab views, rage/dead clicks, last seen —
-which only shows up on installations whose database actually holds telemetry.
-
-A collector that cares about the dashboard-usage story more than its own
-traffic can flip the whole thing: `POLISHD_ANALYTICS_SOURCE=telemetry` points
-every dashboard feature — Analytics, journeys, elements, device sizes, the
-Design tab (fed by the emitter's design scans *of the dashboard itself*), and
-the AI summary — at the telemetry dataset instead. First-party events are
-still captured and stored, so flipping back loses nothing, and the Analytics
-tab can show them meanwhile: on a collector it has a **Site / Telemetry**
-switch beside the range (`?source=`). The switch changes only that tab; the
-AI summary and the other tabs keep reading what the variable picks.
 
 ## Site defaults (`polishd.defaults.json`)
 
@@ -990,7 +941,7 @@ Defaults suit a low-traffic site. Override via `polishd.config.ts`:
 
 ```ts
 // polishd.config.ts
-import { definePolishdConfig } from "@polishd/next";
+import { definePolishdConfig } from "@slothwrk/polishd";
 export default definePolishdConfig({
   sampleRate: 1,
   rageClick: { count: 3, windowMs: 500 },
@@ -1057,12 +1008,9 @@ POLISHD_SESSION_COOKIE=my_session
 | `POLISHD_GITHUB_TOKEN` | GitHub (optional) | Fine-grained PAT: Contents (read), Issues & Pull requests (write) |
 | `POLISHD_GITHUB_API` | GitHub (optional) | REST base for a GitHub Enterprise Server, e.g. `https://ghe.example.com/api/v3`; defaults to `https://api.github.com` |
 | `POLISHD_GITHUB_AUTO_ISSUES` | GitHub (optional) | `true` — file a GitHub issue automatically for each new problem a summary finds |
-| `POLISHD_SNAPSHOT_SERVICE` | optional | `off` — never call Polishd's screenshot service: [site snapshots](#site-snapshots) are then only taken in local development, and the section is off on a public deployment. Or a URL, to use your own deployment of [`service/`](./service) (also in development, for testing it) |
+| `POLISHD_SNAPSHOT_SERVICE` | optional | Unset (or `off`/`local`) — no screenshot service is ever called: [site snapshots](#site-snapshots) are then only taken in local development, and the section is off on a public deployment. A URL enables your own deployment of [`service/`](./service) (also in development, for testing it) |
 | `POLISHD_SNAPSHOT_DIR` | optional | Where disk-stored snapshot images go (default `.polishd/snapshots`) |
 | `POLISHD_SITE_ORIGIN` | optional | The origin snapshots are taken of, if not the one the dashboard is opened on (proxies, tunnels) |
-| `POLISHD_TELEMETRY` | optional | `off` (or `0`/`false`/`no`) — disable [dashboard telemetry](#dashboard-telemetry) entirely, consent prompt included |
-| `POLISHD_TELEMETRY_ENDPOINT` | optional | Where dashboard telemetry is sent, if not the polishd project's own endpoint |
-| `POLISHD_ANALYTICS_SOURCE` | collector only | `telemetry` — point the whole dashboard (every tab, the AI summary included) at collected cross-install telemetry instead of the site's own traffic. The Analytics tab's Site / Telemetry switch still shows either |
 
 AI settings are optional — the dashboard's **Settings** tab configures the same
 fields, and what you save there overrides these env defaults.
@@ -1074,7 +1022,7 @@ of the dashboard. See [DATABASE.md](./DATABASE.md) for production setup.
 
 ## Troubleshooting
 
-Run `npx @polishd/next doctor` first — it catches most of these by name, and
+Run `npx @slothwrk/polishd doctor` first — it catches most of these by name, and
 `--url http://localhost:3000` checks the live path as well.
 
 | Symptom | Cause | Fix |
@@ -1087,7 +1035,7 @@ Run `npx @polishd/next doctor` first — it catches most of these by name, and
 | `ExperimentalWarning: SQLite is an experimental feature` | Node's built-in `node:sqlite` | **Expected and harmless.** Node prints this for its own SQLite module on 22.x. Not a sign the package is unstable, and it disappears in production where Postgres is used |
 | `ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite` | Node < 22.5 | Upgrade Node, or configure Postgres |
 | Server actions fail with an opaque digest | No dashboard page registered a policy | Expected if you deleted `app/polishd/page.tsx` — the actions fail closed by design |
-| Snapshot capture: *"Content-Security-Policy blocked…"* | Your CSP's `connect-src` doesn't allow the screenshot service or the Blob API | Add `https://shots.polishd.muskanvaswan.xyz` and `https://vercel.com` to `connect-src` |
+| Snapshot capture: *"Content-Security-Policy blocked…"* | Your CSP's `connect-src` doesn't allow the screenshot service or the Blob API | Add your service's origin and `https://vercel.com` to `connect-src` |
 | Snapshot capture: *"behind Vercel's Deployment Protection"* | A protected preview deployment; the service only sees Vercel's login | Capture from the production domain, or a deployment without protection |
 | Snapshot capture: *"can't reach …"* | The site isn't on the public internet | Run the dashboard locally (`next dev`), where a browser on your machine shoots it |
 | Site snapshots section is at the bottom of the Design tab, marked Off | Production without a Blob store (on Vercel), or the screenshot service wasn't allowed, or a capture found it can't be used from here | The section's message names which; "Review and allow…" reopens the consent dialog |
@@ -1096,21 +1044,20 @@ Run `npx @polishd/next doctor` first — it catches most of these by name, and
 
 | Import | Contents |
 |---|---|
-| `@polishd/next` | config, `definePolishdConfig`, `resolveSessionCookie`, event types (isomorphic) |
-| `@polishd/next/client` | `initPolishd`, `PolishdMonitor` |
-| `@polishd/next/server` | store, ingest, queries, `withPolishdSession` (Node only) |
-| `@polishd/next/route` | `POST`, `createPolishdRoute` |
-| `@polishd/next/telemetry` | `POST`, `OPTIONS`, `createPolishdTelemetryRoute` — CORS-enabled ingest for telemetry from *other* polishd installs |
-| `@polishd/next/proxy` | `proxy`, `config`, `withPolishdSession`, `polishdMatcher`, `composePolishd` — optional; kept for installs that mint the cookie from a proxy |
-| `@polishd/next/dashboard` | `createPolishdPage`, `polishdTokenAuth`, `PolishdDashboard`, `loadPolishdDashboardData` |
+| `@slothwrk/polishd` | config, `definePolishdConfig`, `resolveSessionCookie`, event types (isomorphic) |
+| `@slothwrk/polishd/client` | `initPolishd`, `PolishdMonitor` |
+| `@slothwrk/polishd/server` | store, ingest, queries, `withPolishdSession` (Node only) |
+| `@slothwrk/polishd/route` | `POST`, `createPolishdRoute` |
+| `@slothwrk/polishd/proxy` | `proxy`, `config`, `withPolishdSession`, `polishdMatcher`, `composePolishd` — optional; kept for installs that mint the cookie from a proxy |
+| `@slothwrk/polishd/dashboard` | `createPolishdPage`, `polishdTokenAuth`, `PolishdDashboard`, `loadPolishdDashboardData` |
 
 ## CLI
 
 | Command | Purpose |
 |---|---|
-| `npx @polishd/next init` | Scaffold the glue files. `--dry-run`, `--force`, `--js`, `--config`, `--fix-workflow[=api-key]` |
-| `npx @polishd/next doctor` | Check an install. `--url <origin>` adds live checks |
-| `npx @polishd/next db check` | Can Polishd use this database: is it Postgres, reachable, and free of tables by Polishd's names? `--env-file <path>`, `--var <NAME>`. Never prints the URL |
+| `npx @slothwrk/polishd init` | Scaffold the glue files. `--dry-run`, `--force`, `--js`, `--config`, `--fix-workflow[=api-key]` |
+| `npx @slothwrk/polishd doctor` | Check an install. `--url <origin>` adds live checks |
+| `npx @slothwrk/polishd db check` | Can Polishd use this database: is it Postgres, reachable, and free of tables by Polishd's names? `--env-file <path>`, `--var <NAME>`. Never prints the URL |
 
 ## Development
 

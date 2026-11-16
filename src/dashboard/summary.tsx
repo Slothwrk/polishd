@@ -103,7 +103,7 @@ export default function SummaryCard({
 
   return (
     // data-component names on this card (and the finer ones on its buttons)
-    // exist for polishd's own dashboard telemetry: clicks captured by the
+    // exist as stable element names: clicks captured by
     // emitter group under these names on the collecting side, so "how often
     // is the summary refreshed?" is answerable. Inert for host apps.
     <section data-component="ai-summary" className={`mb-10 ${card} overflow-hidden`}>

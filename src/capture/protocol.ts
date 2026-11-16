@@ -19,7 +19,6 @@
  */
 
 /** Where released packages send captures. A subdomain the project controls. */
-export const SNAPSHOT_SERVICE_URL = "https://shots.polishd.muskanvaswan.xyz/api/v1";
 
 export const SNAPSHOT_PROTOCOL_VERSION = 1;
 
@@ -434,10 +433,11 @@ export interface SnapshotModeInput {
   /** True under `next dev`. */
   development: boolean;
   /**
-   * `POLISHD_SNAPSHOT_SERVICE`: `off` keeps every capture on this machine
-   * (and so turns capture off on a public deployment); a URL points at
-   * another deployment of the service and is used even in development, which
-   * is how the service path is tested locally.
+   * `POLISHD_SNAPSHOT_SERVICE`: unset (or `off`/`local`) keeps every capture
+   * on this machine — and so turns service capture off on a public
+   * deployment; a URL points at a self-hosted deployment of the service
+   * (`service/` in this repo) and is used even in development, which is how
+   * the service path is tested locally.
    */
   override?: string;
   /** Whether images have somewhere to go: a Blob store, or a writable disk off Vercel. */
@@ -457,13 +457,14 @@ function serviceOverride(override: string | undefined): string | null {
 }
 
 /**
- * The service a capture would use here — an override URL or the hosted one —
- * or null when `POLISHD_SNAPSHOT_SERVICE=off` means it's never called. Named
- * in the consent dialog, including when it's reopened after a "Not now".
+ * The service a capture would use here — an explicitly configured
+ * `POLISHD_SNAPSHOT_SERVICE` URL (a self-hosted deployment) — or null when
+ * it is unset or `off`/`local`, meaning no service is ever called. Named in
+ * the consent dialog, including when it's reopened after a "Not now".
  */
 export function snapshotServiceUrl(override?: string): string | null {
   if (["off", "local"].includes(override?.trim() ?? "")) return null;
-  return serviceOverride(override) ?? SNAPSHOT_SERVICE_URL;
+  return serviceOverride(override);
 }
 
 /** Decide the section's mode. Pure: the dashboard and every capture action ask the same question. */
@@ -473,11 +474,10 @@ export function decideSnapshotMode(input: SnapshotModeInput): SnapshotMode {
   if (!url) {
     if (input.development) return { kind: "local", reason: "development" };
     if (!looksPublicOrigin(input.origin)) return { kind: "local", reason: "not_public" };
-    if (off) return { kind: "disabled", reason: "turned_off" };
+    return { kind: "disabled", reason: "turned_off" };
   }
-  const service = url ?? SNAPSHOT_SERVICE_URL;
   if (!input.storageReady) return { kind: "disabled", reason: "no_storage" };
   if (input.consent === "declined") return { kind: "disabled", reason: "declined" };
-  if (input.consent !== "accepted") return { kind: "consent", url: service };
-  return { kind: "service", url: service };
+  if (input.consent !== "accepted") return { kind: "consent", url };
+  return { kind: "service", url };
 }

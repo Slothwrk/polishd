@@ -157,8 +157,8 @@ export function previewMisses(looked: string[], found: string[]): string[] {
 }
 
 /**
- * The dashboard tab a dashboard-telemetry page stands for: `/~polishd/design`
- * is the dashboard's Design tab. An install that reads dashboard telemetry
+ * The dashboard tab a namespaced dashboard page stands for: `/~polishd/design`
+ * is the dashboard's Design tab. An install that measures its dashboard
  * (Polishd's own site) measures these pages, and a local capture can shoot
  * them, where the development dashboard is open.
  */

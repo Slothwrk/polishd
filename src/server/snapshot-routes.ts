@@ -18,7 +18,7 @@
  *     where even a one-word name (`/tags/react`) is one entry of many.
  *
  * The top level is never read as a slug: /privacy-policy and /how-it-works
- * are pages of their own. Dashboard-telemetry pages (/~polishd/<tab>) are
+ * are pages of their own. Namespaced dashboard pages (/~polishd/<tab>) are
  * each a different tab, never collapsed.
  *
  * Pure, so the test file can pin what counts as a slug.

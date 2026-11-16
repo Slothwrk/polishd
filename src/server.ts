@@ -1,5 +1,5 @@
 /**
- * @polishd/next/server — storage, ingest, and read-side queries.
+ * @slothwrk/polishd/server — storage, ingest, and read-side queries.
  *
  * Node runtime only (uses `node:sqlite` in dev, `pg` in production). Never
  * import this from a client component — it will pull database drivers into the
