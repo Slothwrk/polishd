@@ -6,7 +6,7 @@
  * ingest route, and the dashboard queries, so it must stay dependency-free and
  * runtime-agnostic (no Node, no DOM types beyond primitives).
  *
- * Designed for clean extraction into `@polishd/next` — nothing here knows about
+ * Designed for clean extraction into `@slothwrk/polishd` — nothing here knows about
  * the host notes app.
  */
 
@@ -27,8 +27,7 @@ export type PolishdEventType =
   // retyped by the one-time reclassification because it landed on text
   // (reading, not friction). Kept in the table, counted by no aggregate.
   | "text_click"
-  | "design_scan" // one page's rendered design metrics (fonts, colors, radii, spacing)
-  | "install_state"; // a telemetry install's own state (model connected, provider/model)
+  | "design_scan"; // one page's rendered design metrics (fonts, colors, radii, spacing)
 
 /**
  * A single captured event. The client sends these without a session id; the
@@ -69,7 +68,6 @@ export interface PolishdEvent {
    * - dead_click, rage_click: `handle`, a greppable path to the element
    *   (anchored at a `data-component` or id, distinctive classes) — evidence
    *   only, it can vary between clicks, so nothing groups by it
-   * - install_state: `hasModel`, `provider`, `model`, `version`
    */
   meta?: Record<string, string | number | boolean | null>;
 }
@@ -95,31 +93,12 @@ export interface PolishdIngestBody {
   sid?: string;
 }
 
-/**
- * What a telemetry emitter POSTs to a `@polishd/next/telemetry` route.
- *
- * Unlike first-party ingest, the session id travels in the body: the session
- * cookie is httpOnly and first-party, so a cross-origin POST arrives without
- * it. The *installation's* identity does not travel in the body at all — the
- * receiving route derives it from the request's `Origin` header (the
- * emitter's hostname), which the browser sets and page script cannot forge.
- */
-export interface PolishdTelemetryBody extends PolishdIngestBody {
-  /** Anonymous session id minted by the emitter (no cookie crosses origins). */
-  sessionId: string;
-}
-
 /** A stored event row, as it comes back from the database. */
 export interface PolishdEventRow extends PolishdEvent {
   id: number;
   session_id: string;
   /** Server receive time, ms since epoch — authoritative for retention. */
   received_at: number;
-  /**
-   * Hostname of the installation that sent this event (from the request's
-   * Origin header). Only set on telemetry-ingested rows; null on first-party.
-   */
-  install_id?: string;
   /**
    * The build of the site this event was captured on (see
    * `PolishdIngestBody.build`). Null on rows stored before builds were
@@ -142,10 +121,6 @@ export const CLIENT_EVENT_TYPES: ReadonlySet<PolishdEventType> = new Set<Polishd
   "mount",
   "session_end",
   "design_scan",
-  // Sent only by the dashboard telemetry emitter (once per session): whether
-  // the reporting install has a model connected, and which provider/model.
-  // Never carries a key or any secret — see dashboard/telemetry.tsx.
-  "install_state",
 ]);
 
 // ── Design scan payload ──────────────────────────────────────────────────────

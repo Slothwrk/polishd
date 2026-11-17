@@ -1,9 +1,9 @@
 /**
- * @polishd/next — isomorphic entry point.
+ * @slothwrk/polishd — isomorphic entry point.
  *
  * Safe to import anywhere (client or server). Exposes only config + the event
  * schema; nothing here touches Node, the DOM, or the database. For capture use
- * `@polishd/next/client`, for storage/queries `@polishd/next/server`.
+ * `@slothwrk/polishd/client`, for storage/queries `@slothwrk/polishd/server`.
  */
 export * from "./config";
 export * from "./shared/types";

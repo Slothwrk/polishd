@@ -1,11 +1,11 @@
 /**
- * @polishd/next/route — the ingest endpoint.
+ * @slothwrk/polishd/route — the ingest endpoint.
  *
  * Consumers wire this up in their own route module, declaring the segment
  * config inline — Next rejects a re-exported `runtime` or `dynamic`:
  *
  *   // src/app/api/polishd/route.ts
- *   import { createPolishdRoute } from "@polishd/next/route";
+ *   import { createPolishdRoute } from "@slothwrk/polishd/route";
  *   export const runtime = "nodejs";
  *   export const dynamic = "force-dynamic";
  *   export const POST = createPolishdRoute();

@@ -113,13 +113,13 @@ things to know:
   and can drop them. With one of those, keep Polishd's tables out of its view
   (Drizzle: `tablesFilter`) or give Polishd a database of its own.
 
-`npx @polishd/next db check` answers both before anything is written, and
+`npx @slothwrk/polishd db check` answers both before anything is written, and
 says when the app's database isn't Postgres at all. It reads the URL from an
 environment variable or an env file and never prints it:
 
 ```bash
 vercel env pull .polishd/env.check --environment production --yes
-npx @polishd/next db check --env-file .polishd/env.check --var DATABASE_URL
+npx @slothwrk/polishd db check --env-file .polishd/env.check --var DATABASE_URL
 rm .polishd/env.check
 ```
 
@@ -155,10 +155,10 @@ it from an app's `events` by its columns, and leaves an app's alone. A
 deployment rolled back to an older version afterwards writes to a fresh
 `events` table again, and those rows stay there when you upgrade back.
 
-(`install_id` is null on every first-party event; it is only set on rows that
-arrived through a `@polishd/next/telemetry` endpoint, which tags each event
-with the hostname of the remote installation that sent it — derived
-server-side from the request's Origin header. `build` is the build of the
+(`install_id` is null on every event this package writes — the column only
+exists so databases migrated from upstream `@polishd/next`, whose opt-in
+cross-install telemetry tagged remote rows with a hostname, stay readable;
+this fork has no telemetry endpoint and never sets it. `build` is the build of the
 site the event was captured on — a commit sha or deployment label, see the
 README's [Builds](./README.md#builds) — and null on rows stored before builds
 were tracked or where none was known. Databases created before either column

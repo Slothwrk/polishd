@@ -67,7 +67,7 @@ test("vendored and dot folders are never apps", () => {
 test("of several apps, the one that installs Polishd is picked", () => {
   const manifests: Record<string, string> = {
     "": JSON.stringify({ dependencies: { next: "16" } }),
-    "apps/web": JSON.stringify({ dependencies: { next: "16", "@polishd/next": "0.2" } }),
+    "apps/web": JSON.stringify({ dependencies: { next: "16", "@slothwrk/polishd": "0.2" } }),
   };
   assert.equal(pickAppRoot(["", "apps/docs", "apps/web"], (d) => manifests[d]), "apps/web");
 });

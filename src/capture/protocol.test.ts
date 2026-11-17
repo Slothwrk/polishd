@@ -3,7 +3,6 @@ import { test } from "node:test";
 
 import {
   MAX_FIND_PER_REQUEST,
-  SNAPSHOT_SERVICE_URL,
   decideSnapshotMode,
   parseCaptureBlock,
   snapshotServiceUrl,
@@ -158,18 +157,27 @@ test("development and local addresses shoot locally, with nothing to consent to"
   });
 });
 
-test("production asks before the service is used, and remembers the answer", () => {
-  assert.deepEqual(decideSnapshotMode(base), { kind: "consent", url: SNAPSHOT_SERVICE_URL });
-  assert.deepEqual(decideSnapshotMode({ ...base, consent: "accepted" }), {
-    kind: "service",
-    url: SNAPSHOT_SERVICE_URL,
-  });
-  assert.deepEqual(decideSnapshotMode({ ...base, consent: "declined" }), { kind: "disabled", reason: "declined" });
+test("production with no service configured is off — there is no default to fall back to", () => {
+  assert.deepEqual(decideSnapshotMode(base), { kind: "disabled", reason: "turned_off" });
 });
 
-test("production with nowhere to store images is off, whatever the consent", () => {
+test("a configured service asks before it is used, and remembers the answer", () => {
+  const override = "https://shots.example.com/api/v1";
+  assert.deepEqual(decideSnapshotMode({ ...base, override }), { kind: "consent", url: override });
+  assert.deepEqual(decideSnapshotMode({ ...base, override, consent: "accepted" }), {
+    kind: "service",
+    url: override,
+  });
+  assert.deepEqual(decideSnapshotMode({ ...base, override, consent: "declined" }), {
+    kind: "disabled",
+    reason: "declined",
+  });
+});
+
+test("a configured service with nowhere to store images is off, whatever the consent", () => {
+  const override = "https://shots.example.com/api/v1";
   for (const consent of [null, "accepted", "declined"] as const) {
-    assert.deepEqual(decideSnapshotMode({ ...base, storageReady: false, consent }), {
+    assert.deepEqual(decideSnapshotMode({ ...base, override, storageReady: false, consent }), {
       kind: "disabled",
       reason: "no_storage",
     });
@@ -194,15 +202,16 @@ test("a service URL override applies even in development, consent included", () 
     decideSnapshotMode({ ...base, development: true, override: local, consent: "accepted" }),
     { kind: "service", url: "http://localhost:4100/api/v1" },
   );
-  // Garbage is ignored rather than trusted.
+  // Garbage is ignored rather than trusted — an unparseable override means
+  // no service at all, the same as unset.
   assert.deepEqual(decideSnapshotMode({ ...base, override: "javascript:alert(1)" }), {
-    kind: "consent",
-    url: SNAPSHOT_SERVICE_URL,
+    kind: "disabled",
+    reason: "turned_off",
   });
 });
 
-test("the service named in the consent dialog follows the override", () => {
-  assert.equal(snapshotServiceUrl(undefined), SNAPSHOT_SERVICE_URL);
+test("the service named in the consent dialog follows the override; unset means none", () => {
+  assert.equal(snapshotServiceUrl(undefined), null);
   assert.equal(snapshotServiceUrl("http://localhost:4100/api/v1/"), "http://localhost:4100/api/v1");
   assert.equal(snapshotServiceUrl("off"), null);
 });

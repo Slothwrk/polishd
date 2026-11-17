@@ -3,7 +3,7 @@
  * `moduleResolution: "node"`, which ignores `exports` entirely. Next 15 still
  * writes that setting into a tsconfig it generates, and apps upgraded from
  * older Next versions keep it — there, a subpath missing from `typesVersions`
- * fails `next build` with "Cannot find module '@polishd/next/route'".
+ * fails `next build` with "Cannot find module '@slothwrk/polishd/route'".
  */
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";

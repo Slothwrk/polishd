@@ -127,7 +127,6 @@ const STEP_STYLE: Record<
   component_view: { dot: "bg-violet", verb: "Viewed component", verbTone: "text-violet" },
   mount: { dot: "bg-violet", verb: "Rendered component", verbTone: "text-violet" },
   design_scan: { dot: "bg-fg-4", verb: "Design scan", verbTone: "text-fg-3" },
-  install_state: { dot: "bg-fg-4", verb: "Install state", verbTone: "text-fg-3" },
 };
 
 function JourneyStepRow({

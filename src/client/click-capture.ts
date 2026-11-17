@@ -2,7 +2,7 @@
  * Polishd — click capture: click, rage click, dead click.
  *
  * Shared by the host site's capture layer (`init.ts`) and the dashboard's own
- * telemetry emitter (`dashboard/telemetry.tsx`), so a click is classified the
+ * dashboard's own emitters, so a click is classified the
  * same way on both and the two can't drift apart. Each supplies where events
  * go and which path they belong to; everything about what a click *was* lives
  * here.

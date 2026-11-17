@@ -321,7 +321,7 @@ export function appRootCandidates(paths: string[]): string[] {
 
 /**
  * Pick the app among the candidates: the first whose manifest installs
- * `@polishd/next` — that's the app this dashboard belongs to — otherwise the
+ * `@slothwrk/polishd` — that's the app this dashboard belongs to — otherwise the
  * best guess. A repo with no candidate at all is scanned from its root.
  */
 export function pickAppRoot(
@@ -335,7 +335,7 @@ export function pickAppRoot(
       const pkg = JSON.parse(raw) as Record<string, unknown>;
       const installs = ["dependencies", "devDependencies", "peerDependencies"].some((k) => {
         const deps = pkg[k];
-        return typeof deps === "object" && deps !== null && "@polishd/next" in deps;
+        return typeof deps === "object" && deps !== null && "@slothwrk/polishd" in deps;
       });
       if (installs) return dir;
     } catch {

@@ -2,7 +2,7 @@
 /**
  * Compile the dashboard's stylesheet and scope it to `.polishd-root`.
  *
- * Runs at publish time so consumers get `@polishd/next/dashboard.css` as a
+ * Runs at publish time so consumers get `@slothwrk/polishd/dashboard.css` as a
  * finished artifact — no Tailwind required in the host app, no `@source` step
  * to forget, and no dependence on the host's compiler version.
  *
@@ -191,7 +191,7 @@ const compiled = readFileSync(OUT, "utf8");
 const scoped = postcss([scopePlugin, flattenLayersPlugin]).process(compiled, { from: OUT, to: OUT }).css;
 
 const banner =
-  `/*! @polishd/next dashboard styles — generated, do not edit.\n` +
+  `/*! @slothwrk/polishd dashboard styles — generated, do not edit.\n` +
   ` * Scoped to ${SCOPE_CLASS}; contains no global preflight. */\n`;
 writeFileSync(OUT, banner + scoped);
 
@@ -204,7 +204,7 @@ console.log("• copied dashboard fonts to dist/fonts");
 
 // 4. Make the dashboard load its own stylesheet.
 //
-//    The page-level `import "@polishd/next/dashboard.css"` is one line, and
+//    The page-level `import "@slothwrk/polishd/dashboard.css"` is one line, and
 //    one line is easy to lose — skip it in a manual install, keep a 0.1.x page
 //    that predates it — and the result is the worst kind of failure: the page
 //    renders, the host's own Tailwind (if it scans the package) half-styles it

@@ -182,7 +182,7 @@ export function isVercelProtectionResponse(status: number, headers: Record<strin
 /**
  * Run in every captured page before its own scripts (`context.addInitScript`):
  * `navigator.sendBeacon` becomes a no-op that reports success. Analytics —
- * the site's own Polishd beacons, dashboard telemetry, anyone else's — flush
+ * the site's own Polishd beacons, anyone else's — flush
  * with a beacon as the page closes, and a beacon is the one request a
  * request guard never sees, so this is what keeps a capture from ever
  * counting as a visit. Nothing on a page waits on a beacon's result.
@@ -240,8 +240,7 @@ export function requestAction(
 
 /**
  * True for a batch Polishd itself would record: the site's own analytics
- * (`{"events":…}`, posted to its ingest route) or dashboard telemetry
- * (`{"sessionId":…,"events":…}`, posted to the telemetry collector — on
+ * (`{"events":…}`, posted to its ingest route) — on
  * another origin for every install but the collecting one). A capture that
  * renders the dashboard must report neither.
  */

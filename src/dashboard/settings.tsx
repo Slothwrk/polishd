@@ -256,7 +256,7 @@ export default function SettingsView({
   );
 
   return (
-    // Coarse tag for polishd's own dashboard telemetry: any settings click
+    // Coarse tag for dashboard interaction analytics: any settings click
     // without a finer data-component groups under "settings" on the
     // collecting side. Inert for host apps.
     <main data-component="settings" className="text-fg">

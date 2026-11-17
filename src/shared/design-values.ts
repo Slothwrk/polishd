@@ -94,7 +94,7 @@ export function designPreviewTargets(data: PolishdDesignData): DesignPreviewTarg
 /**
  * Why a flagged value has no picture yet, so its card can say something
  * true. A value measured only on Polishd's dashboard pseudo-pages
- * (`/~polishd/<tab>`, what an install reading dashboard telemetry measures)
+ * (`/~polishd/<tab>`, what an install measuring its dashboard sees)
  * is only pictured by a local capture, which can open the dashboard — a
  * production capture never shoots it. One measured on pages the latest
  * snapshot didn't shoot needs those pages captured, and another identical

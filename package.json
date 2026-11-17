@@ -1,11 +1,11 @@
 {
-  "name": "@polishd/next",
-  "version": "0.3.2",
-  "description": "Drop-in product analytics for Next.js — capture real user behavioral signals (rage/dead clicks, scroll depth, web vitals) and explore them on a built-in dashboard. What gets measured gets improved.",
+  "name": "@slothwrk/polishd",
+  "version": "0.4.0",
+  "description": "Private fork of @polishd/next: self-hosted product analytics and design review for Next.js, with all cross-install telemetry and hosted services removed.",
   "type": "module",
   "license": "MIT",
   "publishConfig": {
-    "access": "public"
+    "registry": "https://npm.pkg.github.com"
   },
   "sideEffects": [
     "*.css",
@@ -34,11 +34,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/muskanvaswan/polishd.git"
+    "url": "git+https://github.com/Slothwrk/polishd.git"
   },
-  "homepage": "https://polishd.site",
+  "homepage": "https://github.com/Slothwrk/polishd",
   "bugs": {
-    "url": "https://github.com/muskanvaswan/polishd/issues"
+    "url": "https://github.com/Slothwrk/polishd/issues"
   },
   "files": [
     "bin",
@@ -67,9 +67,6 @@
       "route": [
         "./dist/route.d.ts"
       ],
-      "telemetry": [
-        "./dist/telemetry.d.ts"
-      ],
       "proxy": [
         "./dist/proxy.d.ts"
       ],
@@ -94,10 +91,6 @@
     "./route": {
       "types": "./dist/route.d.ts",
       "default": "./dist/route.js"
-    },
-    "./telemetry": {
-      "types": "./dist/telemetry.d.ts",
-      "default": "./dist/telemetry.js"
     },
     "./proxy": {
       "types": "./dist/proxy.d.ts",

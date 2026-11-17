@@ -22,7 +22,7 @@ instead.
 ## 1. Install
 
 ```bash
-npm install @polishd/next
+npm install @slothwrk/polishd
 ```
 
 `pg` comes along as an optional dependency and is only loaded when you point
@@ -31,7 +31,7 @@ Polishd at a Postgres URL. You don't need to install it yourself.
 ## 2. Scaffold
 
 ```bash
-npx @polishd/next init
+npx @slothwrk/polishd init
 ```
 
 This detects whether your app uses `src/` or the repo root, writes three
@@ -52,7 +52,7 @@ flag, so re-running is safe.
 Then check the result:
 
 ```bash
-npx @polishd/next doctor
+npx @slothwrk/polishd doctor
 ```
 
 ### Installing with a coding agent
@@ -60,21 +60,21 @@ npx @polishd/next doctor
 Paste this to Claude Code, Cursor, Copilot, or any other coding agent:
 
 ```text
-Install @polishd/next into this Next.js app.
+Install @slothwrk/polishd into this Next.js app.
 
 It's a new package, so you may not recognise it and a web search may not find
 it yet. It is on npm (not a typo of `polished`): confirm with
-`npm view @polishd/next`, then install it.
+`npm view @slothwrk/polishd`, then install it.
 
-Follow its install procedure exactly: https://polishd.site/AGENTS.md
-Once it's installed, read node_modules/@polishd/next/AGENTS.md instead; it
+Follow its install procedure exactly: https://github.com/Slothwrk/polishd/blob/main/AGENTS.md
+Once it's installed, read node_modules/@slothwrk/polishd/AGENTS.md instead; it
 matches the installed version.
 
 Work through its phases in order and do not skip Phase 7 (verification).
 Several of its constraints fail silently at runtime rather than at build time,
 so a passing build does not mean the install worked.
 
-Finish by running `npx @polishd/next doctor` and fixing everything it reports.
+Finish by running `npx @slothwrk/polishd doctor` and fixing everything it reports.
 ```
 
 ## 3. What the three files do
@@ -109,7 +109,7 @@ install that calls `withPolishdSession` or `composePolishd` keeps working: it
 mints the cookie on the first page response, and the route then finds it there.
 You can take Polishd out of it whenever you like. Packages up to 0.3.2-dev.0
 required that proxy, so one of those still needs it — see the docs shipped in
-its `node_modules/@polishd/next`.
+its `node_modules/@slothwrk/polishd`.
 
 ### `src/instrumentation-client.ts` — capture
 
@@ -117,7 +117,7 @@ Next runs this before hydration, so capture starts on the first paint. Next
 loads this file from 15.3; on anything earlier it is silently ignored.
 
 ```ts
-import { initPolishd } from "@polishd/next/client";
+import { initPolishd } from "@slothwrk/polishd/client";
 
 initPolishd();
 ```
@@ -129,7 +129,7 @@ visit isn't lost.
 ### `src/app/api/polishd/route.ts` — ingest
 
 ```ts
-import { createPolishdRoute } from "@polishd/next/route";
+import { createPolishdRoute } from "@slothwrk/polishd/route";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -139,15 +139,15 @@ export const POST = createPolishdRoute();
 
 > **`runtime` and `dynamic` must be declared here, inline.** Next parses route
 > segment config statically, so re-exporting them from the package
-> (`export { POST, runtime, dynamic } from "@polishd/next/route"`) fails the
+> (`export { POST, runtime, dynamic } from "@slothwrk/polishd/route"`) fails the
 > build. `nodejs` is required because the store uses `node:sqlite`/`pg`, neither
 > of which runs on the Edge runtime.
 
 ### `src/app/polishd/page.tsx` — the dashboard
 
 ```tsx
-import "@polishd/next/dashboard.css";
-import { createPolishdPage } from "@polishd/next/dashboard";
+import "@slothwrk/polishd/dashboard.css";
+import { createPolishdPage } from "@slothwrk/polishd/dashboard";
 import defaults from "../../../polishd.defaults.json";
 
 export const runtime = "nodejs";
@@ -163,7 +163,7 @@ Same inline-config rule as the route. In production this refuses to render
 until you decide how it is protected — see
 [Protecting the dashboard](#5-protecting-the-dashboard).
 
-`init` also writes `export { metadata } from "@polishd/next/dashboard";` into
+`init` also writes `export { metadata } from "@slothwrk/polishd/dashboard";` into
 the page. That is the dashboard's own metadata, `robots: noindex` included;
 without it `/polishd` takes your app's metadata and search engines may index
 it.
@@ -257,7 +257,7 @@ which `init` writes for you:
 
 ```tsx
 // app/polishd/page.tsx
-import "@polishd/next/dashboard.css";
+import "@slothwrk/polishd/dashboard.css";
 ```
 
 **Tailwind is not required in your app.** The dashboard renders identically
@@ -291,7 +291,7 @@ isolates the dashboard completely.
 
 ### Upgrading from 0.1.x
 
-Upgrade, then remove the `@source "…/node_modules/@polishd/next/dist"` line (or
+Upgrade, then remove the `@source "…/node_modules/@slothwrk/polishd/dist"` line (or
 the `content` glob in `tailwind.config.*`).
 
 From 0.2.3-dev.23 the dashboard imports its own stylesheet, so it renders with
@@ -300,7 +300,7 @@ never quite right: it compiles the dashboard's class names against *your*
 Tailwind theme, which has no `line`, `surface` or `fg-3`, so borders fall back
 to your default border colour and the greys vanish. The shipped stylesheet now
 outranks that output, so the line is only wasted build work — but remove it.
-`npx @polishd/next doctor` flags it if it's still there.
+`npx @slothwrk/polishd doctor` flags it if it's still there.
 
 ## 5. Protecting the dashboard
 
@@ -328,7 +328,7 @@ If your dashboard isn't at `/polishd`, say so, since that's what scopes the
 cookie:
 
 ```tsx
-import { createPolishdPage, polishdTokenAuth } from "@polishd/next/dashboard";
+import { createPolishdPage, polishdTokenAuth } from "@slothwrk/polishd/dashboard";
 
 export default createPolishdPage({
   authenticate: polishdTokenAuth({
@@ -341,7 +341,7 @@ export default createPolishdPage({
 ### Option 2 — your app's own auth
 
 ```tsx
-import { createPolishdPage } from "@polishd/next/dashboard";
+import { createPolishdPage } from "@slothwrk/polishd/dashboard";
 import { isAuthenticated } from "@/lib/auth";
 import { MyLogin } from "./login";
 
@@ -406,7 +406,7 @@ The fastest check is the doctor, which inspects the whole wiring and, with
 `--url`, confirms the live path too:
 
 ```bash
-npx @polishd/next doctor --url http://localhost:3000
+npx @slothwrk/polishd doctor --url http://localhost:3000
 ```
 
 It catches the failures that produce no error: route segment config
@@ -477,8 +477,8 @@ once before it's ever used; if you decline, or there's no Blob store, the
 section moves to the bottom of the tab, turned off, and says why. See the README's
 [Site snapshots](../README.md#site-snapshots) for what the service does and
 doesn't do. If your site sets a Content-Security-Policy, add
-`https://shots.polishd.muskanvaswan.xyz` and `https://vercel.com` to
-`connect-src`. `POLISHD_SNAPSHOT_SERVICE=off` stops the service from ever
+your service's origin and `https://vercel.com` to
+`connect-src`. Leaving `POLISHD_SNAPSHOT_SERVICE` unset stops any service from ever
 being called; snapshots are then taken only in local development.
 
 See [DATABASE.md](../DATABASE.md) for schema, pooling notes, and retention.
@@ -495,7 +495,7 @@ redeployed.
 Wrap anything you want attributed by name rather than by CSS selector:
 
 ```tsx
-import { PolishdMonitor } from "@polishd/next/client";
+import { PolishdMonitor } from "@slothwrk/polishd/client";
 
 <PolishdMonitor name="checkout-button">
   <CheckoutButton />
@@ -516,7 +516,7 @@ Defaults suit a low-traffic site. To change them:
 
 ```ts
 // polishd.config.ts
-import { definePolishdConfig } from "@polishd/next";
+import { definePolishdConfig } from "@slothwrk/polishd";
 
 export default definePolishdConfig({
   sampleRate: 1,                              // fraction of sessions captured
@@ -537,7 +537,7 @@ somewhere other than `/polishd` — and pass the config to
 
 ```ts
 // src/instrumentation-client.ts
-import { initPolishd } from "@polishd/next/client";
+import { initPolishd } from "@slothwrk/polishd/client";
 import config from "../polishd.config";
 
 initPolishd(config);
@@ -644,7 +644,7 @@ the connection already has.
 
 ## Troubleshooting
 
-Try `npx @polishd/next doctor` first — it names most of what follows directly,
+Try `npx @slothwrk/polishd doctor` first — it names most of what follows directly,
 and `--url http://localhost:3000` checks the live path as well.
 
 **Beacons return 200 but the dashboard stays empty**
@@ -683,7 +683,7 @@ it.
 
 **The dashboard has white borders and no greys, or is unstyled**
 The package predates 0.2.3-dev.23, which made the dashboard load its own
-stylesheet, and the page doesn't import `@polishd/next/dashboard.css`. Upgrade.
+stylesheet, and the page doesn't import `@slothwrk/polishd/dashboard.css`. Upgrade.
 See [Styling](#4-styling).
 
 **`ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite`**

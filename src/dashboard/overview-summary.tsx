@@ -144,7 +144,7 @@ export default function OverviewSummary({
   const writing = pending && story === null;
 
   return (
-    // data-component names feed polishd's own dashboard telemetry; inert for host apps.
+    // data-component names identify dashboard elements; inert for host apps.
     <section
       data-component="overview-summary"
       aria-label="Overview"

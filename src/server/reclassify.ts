@@ -47,7 +47,7 @@ async function run(): Promise<void> {
   if (!(await storeReady())) return;
   if ((await getMeta(SEMANTICS_KEY)) === SEMANTICS_VERSION) return;
 
-  // All rows, including cross-install telemetry — every writer used the same
+  // All rows — every writer used the same
   // client classification, so every writer's history has the same skew.
   const rows = await query(
     `SELECT id, type, selector, text FROM ${EVENTS_TABLE} WHERE type IN ('dead_click', 'rage_click')`,

@@ -77,7 +77,7 @@ function TogglePills<T extends string>({
   options: readonly T[];
   value: T;
   onChange: (v: T) => void;
-  /** `data-component` name for dashboard telemetry — see the card below. */
+  /** `data-component` name for dashboard interaction analytics — see the card below. */
   component: string;
 }) {
   return (
@@ -132,7 +132,7 @@ export function ShotTile({
   /** The tile's size and placement — its aspect ratio, and any grid span. */
   frameClassName?: string;
   caption?: "below" | "overlay";
-  /** `data-component` name for dashboard telemetry. */
+  /** `data-component` name for dashboard interaction analytics. */
   component?: string;
 }) {
   const [src, setSrc] = useState<string | null>(known ?? null);
@@ -609,7 +609,7 @@ function SnapshotsCard() {
   );
 
   return (
-    // The data-component names here feed polishd's own dashboard telemetry:
+    // The data-component names here identify dashboard elements:
     // clicks group under these on the collecting side, so "does anyone shoot
     // a second snapshot?" is answerable. Inert for host apps.
     <section

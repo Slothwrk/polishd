@@ -19,7 +19,6 @@ import {
   type CaptureHealth,
 } from "../shared/capture-status";
 import { NO_SESSION_META_KEY } from "./ingest";
-import { resolveAnalyticsSource, type PolishdAnalyticsSource } from "./telemetry";
 import { resolveDashboardRoute } from "../config";
 import {
   EMPTY_FRICTION,
@@ -41,8 +40,6 @@ export interface EventFilter {
   since?: number | null;
   /** Only events captured on this build (see `PolishdEventRow.build`). */
   build?: string | null;
-  /** Which dataset to read. Omitted, `POLISHD_ANALYTICS_SOURCE` decides. */
-  source?: PolishdAnalyticsSource | null;
 }
 
 /** A string as a SQL literal. The values inlined here are never user-typed. */
@@ -82,29 +79,17 @@ function literal(value: string): string {
 export function polishdEventsSource(filter: EventFilter = {}): string {
   const conditions: string[] = [];
 
-  // POLISHD_ANALYTICS_SOURCE=telemetry points the whole dashboard at the
-  // cross-install telemetry it collects instead of the site's own traffic —
-  // every feature reads through here, so the collector gets the full
-  // experience (analytics, journeys, design, AI summary) over dashboard
-  // usage. Telemetry paths are namespaced /~polishd/… by the emitter, so the
-  // dashboard-route exclusion below has nothing to exclude in this mode.
-  // `filter.source` overrides it per call: the Analytics tab's source switch.
-  if ((filter.source ?? resolveAnalyticsSource()) === "telemetry") {
-    conditions.push("install_id IS NOT NULL");
-  } else {
-    // Telemetry rows (dashboard usage reported by *other* polishd installs,
-    // tagged with their hostname) live in the same table but are a different
-    // dataset: they must never count as this site's sessions, pages, or
-    // interactions, feed its AI digest, or rank among its features. They are
-    // read only by the installs queries below.
-    conditions.push("install_id IS NULL");
-    const route = resolveDashboardRoute().replace(/\/+$/, "");
-    // A blank route means "exclude no path" — without this guard the prefix test
-    // below would match every path, and the dashboard would render permanently empty.
-    if (route) {
-      conditions.push(`path <> ${literal(route)}`);
-      conditions.push(`substr(path, 1, ${route.length + 1}) <> ${literal(`${route}/`)}`);
-    }
+  // Rows tagged with an install id are foreign data (written by an older
+  // upstream package on a shared database): never count them as this site's
+  // traffic.
+  conditions.push("install_id IS NULL");
+
+  const route = resolveDashboardRoute().replace(/\/+$/, "");
+  // A blank route means "exclude no path" — without this guard the prefix test
+  // below would match every path, and the dashboard would render permanently empty.
+  if (route) {
+    conditions.push(`path <> ${literal(route)}`);
+    conditions.push(`substr(path, 1, ${route.length + 1}) <> ${literal(`${route}/`)}`);
   }
 
   if (typeof filter.since === "number" && Number.isFinite(filter.since)) {
@@ -1044,10 +1029,8 @@ export type { CaptureHealth } from "../shared/capture-status";
  * after the most recent drop means sessions are being minted right now. The
  * windowed counts let the dashboard describe the rest in proportion.
  *
- * `source` picks which dataset's storing is compared against the drops, as
- * `EventFilter.source` does; omitted, `POLISHD_ANALYTICS_SOURCE` decides.
  */
-export async function getCaptureHealth(source?: PolishdAnalyticsSource | null): Promise<CaptureHealth> {
+export async function getCaptureHealth(): Promise<CaptureHealth> {
   const windowMs = CAPTURE_WINDOW_MS;
   const empty: CaptureHealth = {
     noSessionCount: 0,
@@ -1070,7 +1053,7 @@ export async function getCaptureHealth(source?: PolishdAnalyticsSource | null): 
          MAX(received_at)                                                AS "lastStoredAt",
          SUM(CASE WHEN received_at >= ? THEN 1 ELSE 0 END)               AS "recentEvents",
          COUNT(DISTINCT CASE WHEN received_at >= ? THEN received_at END) AS "recentBatches"
-       FROM ${polishdEventsSource({ source })}`,
+       FROM ${polishdEventsSource()}`,
       [since, since],
     ),
     getMeta(NO_SESSION_META_KEY),
@@ -1153,10 +1136,9 @@ export async function getBuilds(limit = 50, filter: EventFilter = {}): Promise<B
 /**
  * The build currently shipping, as far as the store can tell: the one that
  * appeared most recently. Null until a build has been stamped on anything.
- * `source` as in `EventFilter`.
  */
-export async function getCurrentBuild(source?: PolishdAnalyticsSource | null): Promise<BuildStat | null> {
-  return (await getBuilds(1, { source }))[0] ?? null;
+export async function getCurrentBuild(): Promise<BuildStat | null> {
+  return (await getBuilds(1))[0] ?? null;
 }
 
 // ── Aggregate loader ─────────────────────────────────────────────────────────
@@ -1182,8 +1164,8 @@ export interface PolishdDashboardData {
  * `filter` scopes every section at once (the Analytics tab's range); the AI
  * summary always reads the whole history, so it passes none. Capture health
  * is never scoped to a window — it describes the wiring, not a window of
- * traffic — but it does follow the filter's source.
  */
+
 export async function loadPolishdDashboardData(filter: EventFilter = {}): Promise<PolishdDashboardData> {
   // One-time sweep retyping historical text clicks recorded as dead/rage under
   // the old rules — after it, every aggregate below reads corrected history.
@@ -1203,7 +1185,7 @@ export async function loadPolishdDashboardData(filter: EventFilter = {}): Promis
     monitored,
   ] = await Promise.all([
     getOverview(filter),
-    getCaptureHealth(filter.source),
+    getCaptureHealth(),
     getTopPages(8, filter),
     getMetricTrends(filter),
     getElementStats(12, filter),
@@ -1298,127 +1280,4 @@ export async function getFriction(): Promise<FrictionIndex> {
       : [];
   });
   return withRageHandles(foldFriction(parsed, capped), handles);
-}
-
-// ── Cross-install telemetry (the installs view) ──────────────────────────────
-// Everything above reads through polishdEventsSource(), which filters
-// telemetry rows out; these two queries are the only readers of them. They
-// power the dashboard's Installs tab — present only on installations that
-// collect telemetry, i.e. whose database actually holds tagged rows.
-
-export interface TelemetryInstall {
-  /** The installation's hostname, as derived from its requests' Origin. */
-  install: string;
-  sessions: number;
-  events: number;
-  /** Dashboard tab views (page_view events). */
-  pageViews: number;
-  clicks: number;
-  rageClicks: number;
-  deadClicks: number;
-  /** Server receive time of the most recent event, ms since epoch. */
-  lastSeen: number;
-  /** Whether a model is connected there; null = never reported (old emitter). */
-  hasModel: boolean | null;
-  /** Provider/model in use, from the latest install_state report. */
-  provider: string | null;
-  model: string | null;
-}
-
-/** One row per reporting installation, most recently active first. */
-export async function getTelemetryInstalls(limit = 100): Promise<TelemetryInstall[]> {
-  const rows = await query(
-    `SELECT install_id,
-            COUNT(DISTINCT session_id) AS sessions,
-            COUNT(*) AS events,
-            SUM(CASE WHEN type = 'page_view' THEN 1 ELSE 0 END) AS page_views,
-            SUM(CASE WHEN type = 'click' THEN 1 ELSE 0 END) AS clicks,
-            SUM(CASE WHEN type = 'rage_click' THEN 1 ELSE 0 END) AS rage_clicks,
-            SUM(CASE WHEN type = 'dead_click' THEN 1 ELSE 0 END) AS dead_clicks,
-            MAX(received_at) AS last_seen
-     FROM ${EVENTS_TABLE}
-     WHERE install_id IS NOT NULL
-     GROUP BY install_id
-     ORDER BY last_seen DESC
-     LIMIT ?`,
-    [limit],
-  );
-
-  // The newest install_state per install answers "is a model connected, and
-  // which one" — state the click stream can't carry. Latest wins so an
-  // install that connects (or disconnects) a model reads correctly.
-  const stateRows = await query(
-    `SELECT install_id, meta FROM ${EVENTS_TABLE} e
-     WHERE type = 'install_state' AND install_id IS NOT NULL
-       AND id = (SELECT MAX(id) FROM ${EVENTS_TABLE} e2
-                 WHERE e2.type = 'install_state' AND e2.install_id = e.install_id)`,
-  );
-  const states = new Map<string, { hasModel: boolean; provider: string | null; model: string | null }>();
-  for (const r of stateRows) {
-    const meta = parseMeta(r.meta);
-    if (!meta) continue;
-    states.set(r.install_id as string, {
-      hasModel: meta.hasModel === true,
-      provider: typeof meta.provider === "string" && meta.provider ? meta.provider : null,
-      model: typeof meta.model === "string" && meta.model ? meta.model : null,
-    });
-  }
-
-  return rows.map((r) => {
-    const state = states.get(r.install_id as string);
-    return {
-      install: r.install_id as string,
-      sessions: num(r, "sessions"),
-      events: num(r, "events"),
-      pageViews: num(r, "page_views"),
-      clicks: num(r, "clicks"),
-      rageClicks: num(r, "rage_clicks"),
-      deadClicks: num(r, "dead_clicks"),
-      lastSeen: num(r, "last_seen"),
-      hasModel: state ? state.hasModel : null,
-      provider: state?.hasModel ? state.provider : null,
-      model: state?.hasModel ? state.model : null,
-    };
-  });
-}
-
-export interface TelemetryPathStat {
-  /** The namespaced dashboard path, e.g. "/~polishd/analytics". */
-  path: string;
-  views: number;
-  sessions: number;
-  installs: number;
-}
-
-/** Which dashboard tabs get used, across every reporting installation. */
-export async function getTelemetryTopPaths(limit = 10): Promise<TelemetryPathStat[]> {
-  const rows = await query(
-    `SELECT path,
-            COUNT(*) AS views,
-            COUNT(DISTINCT session_id) AS sessions,
-            COUNT(DISTINCT install_id) AS installs
-     FROM ${EVENTS_TABLE}
-     WHERE install_id IS NOT NULL AND type = 'page_view'
-     GROUP BY path
-     ORDER BY views DESC
-     LIMIT ?`,
-    [limit],
-  );
-  return rows.map((r) => ({
-    path: r.path as string,
-    views: num(r, "views"),
-    sessions: num(r, "sessions"),
-    installs: num(r, "installs"),
-  }));
-}
-
-/**
- * Whether any telemetry has ever landed here — the cheap gate that decides
- * whether the dashboard shows an Installs tab at all. Almost every
- * installation is a *sender*, not a collector, and for them the tab would
- * only ever be an empty screen.
- */
-export async function hasTelemetryInstalls(): Promise<boolean> {
-  const rows = await query(`SELECT 1 AS present FROM ${EVENTS_TABLE} WHERE install_id IS NOT NULL LIMIT 1`);
-  return rows.length > 0;
 }

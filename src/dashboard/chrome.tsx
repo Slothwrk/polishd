@@ -43,7 +43,6 @@ import {
   ChartIcon,
   DropletIcon,
   GearIcon,
-  GlobeIcon,
   GridIcon,
   IssueIcon,
   MoonIcon,
@@ -58,7 +57,6 @@ export type PolishdDashboardTab =
   | "actionables"
   | "analytics"
   | "design"
-  | "installs"
   | "settings";
 
 const TABS: { id: PolishdDashboardTab; name: string; icon: ReactNode }[] = [
@@ -70,9 +68,6 @@ const TABS: { id: PolishdDashboardTab; name: string; icon: ReactNode }[] = [
   { id: "actionables", name: "Actionables", icon: <IssueIcon size={15} /> },
   { id: "analytics", name: "Analytics", icon: <ChartIcon size={15} /> },
   { id: "design", name: "Design", icon: <DropletIcon size={15} /> },
-  // Shown only on installations that collect cross-install telemetry — for
-  // everyone else (the senders) it would be a permanently empty screen.
-  { id: "installs", name: "Installs", icon: <GlobeIcon size={15} /> },
   { id: "settings", name: "Settings", icon: <GearIcon size={15} /> },
 ];
 
@@ -146,15 +141,12 @@ function scrollTopFrom(node: HTMLElement | null): void {
 
 export default function DashboardChrome({
   active,
-  showInstalls = false,
   theme = "dark",
   children,
 }: {
   active: PolishdDashboardTab;
   /** The theme the server rendered, from the owner's cookie. Dark by default. */
   theme?: PolishdTheme;
-  /** Render the Installs tab (only collectors of telemetry pass true). */
-  showInstalls?: boolean;
   children: ReactNode;
 }) {
   const router = useRouter();
@@ -172,12 +164,6 @@ export default function DashboardChrome({
 
   const selected = target ?? active;
   const loading = pending && target !== null;
-
-  // The tabs that only exist on some installations. Anything absent here is
-  // always shown.
-  const earned: Partial<Record<PolishdDashboardTab, boolean>> = {
-    installs: showInstalls,
-  };
 
   const navigate = (tab: PolishdDashboardTab) => {
     if (tab === selected) return;
@@ -219,12 +205,7 @@ export default function DashboardChrome({
                 aria-label="Dashboard sections"
                 className="-mx-4 mt-5 flex gap-1 overflow-x-auto px-4 pb-1 [scrollbar-width:none] lg:mx-0 lg:mt-8 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
               >
-                {TABS.filter(
-                  // Direct navigation to a tab this install hasn't earned
-                  // still shows its rail entry, so the page never renders with
-                  // no tab highlighted.
-                  (tab) => earned[tab.id] !== false || active === tab.id,
-                ).map((tab) => {
+                {TABS.map((tab) => {
                   const isSelected = selected === tab.id;
                   return (
                     <TabLink

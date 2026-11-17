@@ -127,9 +127,10 @@ function's memory.
 2. Storage → Marketplace → **Upstash Redis**, connected to the project. It
    injects `KV_REST_API_URL` / `KV_REST_API_TOKEN`; `UPSTASH_REDIS_REST_URL` /
    `UPSTASH_REDIS_REST_TOKEN` work too. Optionally tune the limits above.
-3. Domain: `shots.polishd.muskanvaswan.xyz`, the URL released packages call
-   (`SNAPSHOT_SERVICE_URL` in `src/capture/protocol.ts`).
-4. Check `GET https://shots.polishd.muskanvaswan.xyz/api/v1` reports
+3. Note the deployment's URL — `https://<project>.vercel.app` or a domain of
+   yours — and set it as `POLISHD_SNAPSHOT_SERVICE` on every install that
+   should use it (`https://<project>.vercel.app/api/v1`).
+4. Check `GET https://<project>.vercel.app/api/v1` reports
    `"ok": true, "limiter": "redis", "browser": "ok"`.
 
 No other secrets: the service holds no credentials for any site.

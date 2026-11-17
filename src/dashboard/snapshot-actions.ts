@@ -117,7 +117,7 @@ export async function beginSnapshotCaptureAction(
     const dashboardRoute = resolveDashboardRoute();
     // Shoot what visitors have actually rendered, never the dashboard as a
     // page of the site. The exception is an install that measures Polishd's
-    // own dashboard (it reads dashboard telemetry, labelled /~polishd/<tab>):
+    // own dashboard (labelled /~polishd/<tab>):
     // a local capture shoots those tabs too, where the development dashboard
     // is open. The hosted service never does — it would need the dashboard's
     // credentials.
